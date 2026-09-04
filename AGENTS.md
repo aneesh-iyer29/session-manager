@@ -5,7 +5,7 @@ content with a module table; this file stands alone for the essentials.
 
 ## What this is
 
-Claude Swapper: a macOS Electron (main: Node) + React (renderer) + TypeScript app. It
+Session Manager: a macOS Electron (main: Node) + React (renderer) + TypeScript app. It
 tracks usage for many Claude Code accounts, swaps the active login before the Fable weekly
 (or 5-hour / weekly) limit hits, and shows one Codex account's quota read-only. Single
 user, local only, no telemetry.

@@ -24,7 +24,7 @@ export function dataDir(): string {
   const env = process.env.CLAUDE_SWAPPER_HOME
   if (env) return env
   if (injectedDataDir) return injectedDataDir
-  return join(homedir(), 'Library', 'Application Support', 'Claude Swapper')
+  return join(homedir(), 'Library', 'Application Support', 'Session Manager')
 }
 
 /** Claude Code's config directory (`$CLAUDE_CONFIG_DIR` or `~/.claude`). */

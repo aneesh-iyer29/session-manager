@@ -1,23 +1,41 @@
-/* Cards, meters, controls, panels, toasts. */
+/* Cards, meters, controls, panels, toasts — in the house idiom: white boxes
+   on paper with a warm-grey rule, 3 px corners, no shadows, no blur, tracked
+   uppercase labels, ink-filled primary actions. */
 
 /* ---- cards ---------------------------------------------------------- */
 .card {
+  position: relative;
   background: var(--surface);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--hairline);
+  border: 1px solid var(--hairline-strong);
   border-radius: var(--radius-card);
   padding: 16px;
   min-width: 0;
 }
 
+/* The active card carries the brand's chamfered rule down its left edge. */
 .card--hero {
-  box-shadow: var(--shadow-hero);
+  padding: 18px 18px 18px 24px;
+  border-color: var(--sep);
+}
+
+.card--hero::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 8px;
+  width: 4px;
+  background: var(--gold);
+  clip-path: polygon(50% 0, 100% 6px, 100% calc(100% - 6px), 50% 100%, 0 calc(100% - 6px), 0 6px);
+}
+
+.card--disabled {
+  border-style: dotted;
 }
 
 .card--disabled .gauge__number,
 .card--disabled .meter__fill {
-  opacity: 0.55;
+  opacity: 0.5;
 }
 
 .card__head {
@@ -37,25 +55,25 @@
 }
 
 .card__name {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-
 .card__identity > .card__email {
   flex: 1 1 40px;
 }
 
 .card--hero .card__name {
-  font-size: 17px;
+  font-size: 16px;
 }
 
 .card__email {
-  color: var(--text-2);
+  color: var(--text-3);
+  font-size: 12px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -63,7 +81,11 @@
 }
 
 .card__meta {
-  color: var(--text-2);
+  color: var(--text-3);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -72,6 +94,8 @@
   align-items: center;
   gap: 8px;
   margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hairline);
   flex-wrap: wrap;
 }
 
@@ -80,8 +104,9 @@
 }
 
 .card__note {
-  margin-top: 12px;
+  margin: 12px 0 0;
   color: var(--text-2);
+  font-size: 12px;
 }
 
 .card__note--danger {
@@ -99,33 +124,34 @@
 .gauge__row {
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: 10px;
 }
 
 .gauge__number {
-  font-size: 28px;
-  font-weight: 600;
+  font-size: 26px;
+  font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1;
   min-width: 3ch;
 }
 
 .gauge--hero .gauge__number {
-  font-size: 56px;
+  font-size: 52px;
   letter-spacing: -0.03em;
   min-width: 4ch;
 }
 
 .gauge__unit {
-  color: var(--text-2);
-}
-
-.gauge--hero .gauge__unit {
-  font-size: 15px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
 .gauge__window {
   color: var(--text-2);
+  font-size: 12px;
   display: flex;
   gap: 6px;
   align-items: baseline;
@@ -136,6 +162,7 @@
 
 .gauge__window .mono {
   color: var(--text);
+  font-weight: 700;
 }
 
 .gauge__number--ok {
@@ -148,14 +175,14 @@
   color: var(--danger);
 }
 .gauge__number--unknown {
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 /* ---- meters --------------------------------------------------------- */
 .meter {
   position: relative;
   height: 6px;
-  border-radius: 3px;
+  border-radius: 1px;
   background: var(--track);
   overflow: hidden;
   min-width: 0;
@@ -163,7 +190,6 @@
 
 .meter--hero {
   height: 10px;
-  border-radius: 5px;
   margin-top: 12px;
 }
 
@@ -190,8 +216,7 @@
   bottom: 0;
   width: 2px;
   margin-left: -1px;
-  background: var(--text);
-  opacity: 0.35;
+  background: var(--ink);
 }
 
 .meter-row {
@@ -200,6 +225,7 @@
   align-items: center;
   gap: 8px;
   color: var(--text-2);
+  font-size: 12px;
 }
 
 .meter-row__label {
@@ -211,6 +237,7 @@
 .meter-row__pct {
   text-align: right;
   color: var(--text);
+  font-weight: 700;
 }
 
 .meter-row__reset {
@@ -219,6 +246,7 @@
   min-width: 6ch;
   text-align: right;
   white-space: nowrap;
+  color: var(--text-3);
 }
 
 .meter-list {
@@ -234,8 +262,8 @@
 }
 
 .meter-list--compact .meter-row {
-  grid-template-columns: 64px minmax(0, 1fr) 4ch auto;
-  font-size: 12px;
+  grid-template-columns: 56px minmax(0, 1fr) 4ch auto;
+  font-size: 11px;
 }
 
 /* ---- pills & badges ------------------------------------------------- */
@@ -244,44 +272,48 @@
   align-items: center;
   gap: 6px;
   height: 22px;
-  padding: 0 10px;
+  padding: 0 8px;
   border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
+  border: 1px solid var(--hairline-strong);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
-  background: var(--control);
-  color: var(--text-2);
+  color: var(--text-3);
+  background: transparent;
 }
 
 .pill--active {
-  background: var(--accent);
-  color: #fff;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .pill--armed {
-  background: var(--accent-tint);
-  color: var(--accent);
+  border-color: var(--gold);
+  color: var(--gold);
+  background: var(--gold-tint);
 }
 
 .pill--dry {
-  background: var(--control);
-  color: var(--warn);
+  border-style: dotted;
+  color: var(--text-2);
 }
 
 .pill__dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
+  border-radius: 1px;
   background: currentColor;
 }
 
 .badge {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-3);
   white-space: nowrap;
 }
 
@@ -302,51 +334,71 @@
   height: 28px;
   padding: 0 12px;
   border-radius: var(--radius-control);
-  background: var(--control);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface);
   color: var(--text);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   white-space: nowrap;
-  transition: background 120ms ease;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
 }
 
 .btn:hover:not(:disabled) {
-  background: var(--control-hover);
+  background: var(--control);
+  border-color: var(--sep);
 }
 
 .btn--primary {
-  background: var(--accent);
-  color: #fff;
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
 }
 
 .btn--primary:hover:not(:disabled) {
-  background: var(--accent);
-  filter: brightness(1.08);
+  background: var(--ink-hover);
+  border-color: var(--ink-hover);
 }
 
+/* Quiet actions read as links, the way the site's secondary navigation does. */
 .btn--quiet {
   background: transparent;
-  color: var(--text-2);
-  padding: 0 8px;
+  border-color: transparent;
+  color: var(--text-3);
+  padding: 0 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--sep);
 }
 
 .btn--quiet:hover:not(:disabled) {
+  background: transparent;
+  border-color: transparent;
   color: var(--text);
+  text-decoration-color: var(--text);
 }
 
 .btn--danger {
   color: var(--danger);
+  border-color: var(--hairline-strong);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: var(--danger-tint);
+  border-color: var(--danger);
 }
 
 .btn--danger.btn--confirm {
   background: var(--danger);
-  color: #fff;
+  border-color: var(--danger);
+  color: #fbfaf7;
 }
 
 .btn--sm {
   height: 24px;
   padding: 0 10px;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .btn--icon {
@@ -355,8 +407,9 @@
 }
 
 .btn__glyph {
-  font-size: 15px;
+  font-size: 14px;
   line-height: 1;
+  letter-spacing: 0;
 }
 
 .btn__glyph--spin {
@@ -386,12 +439,12 @@
 
 .name-edit__input {
   height: 24px;
-  padding: 0 8px;
-  border-radius: 6px;
-  border: 1px solid var(--hairline-strong);
-  background: var(--surface-solid);
-  font-size: 15px;
-  font-weight: 600;
+  padding: 0 6px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--sep);
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 700;
   letter-spacing: -0.01em;
   width: 160px;
   min-width: 0;
@@ -402,12 +455,13 @@
   flex: 0 1 auto;
   min-width: 0;
   max-width: 60%;
-  border-radius: 6px;
+  border-radius: var(--radius-control);
   padding: 0 4px;
   margin-left: -4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-bottom: 1px dotted transparent;
 }
 
 .name-edit__button:hover {
@@ -421,42 +475,54 @@
   gap: 12px;
   flex-wrap: wrap;
   color: var(--text-2);
+  padding: 12px 16px;
+  border: 1px dotted var(--sep);
+  border-radius: var(--radius-card);
 }
 
 .add-row__label {
-  font-weight: 500;
-  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
 .add-row__hint {
   font-size: 12px;
+  color: var(--text-3);
 }
 
 /* ---- empty state ---------------------------------------------------- */
 .empty {
-  padding: 32px 24px;
+  padding: 40px 24px;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  border-style: dotted;
 }
 
 .empty__title {
-  font-size: 17px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-brand);
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .empty__body {
   color: var(--text-2);
-  max-width: 420px;
+  max-width: 46ch;
+  margin: 0;
+  line-height: 1.6;
 }
 
 .empty__actions {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 /* ---- panels (right column) ----------------------------------------- */
@@ -467,8 +533,9 @@
 }
 
 .panel__summary {
-  color: var(--text-2);
-  line-height: 1.5;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.6;
 }
 
 .panel__decision {
@@ -476,18 +543,21 @@
   gap: 8px;
   align-items: baseline;
   color: var(--text-2);
-  line-height: 1.45;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .panel__decision-action {
   flex: none;
-  font-weight: 500;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 10px;
   color: var(--text);
-  text-transform: capitalize;
 }
 
 .panel__decision-action--switch {
-  color: var(--accent);
+  color: var(--gold);
 }
 
 .panel__decision-action--blocked {
@@ -497,7 +567,7 @@
 .field-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px 12px;
+  gap: 10px 12px;
 }
 
 .field {
@@ -512,8 +582,11 @@
 }
 
 .field__label {
-  font-size: 12px;
-  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
 .field__input {
@@ -521,9 +594,19 @@
   padding: 0 8px;
   border-radius: var(--radius-control);
   border: 1px solid var(--hairline-strong);
-  background: var(--surface-solid);
+  background: var(--surface);
   min-width: 0;
   width: 100%;
+  font-size: 13px;
+  transition: border-color 0.18s;
+}
+
+.field__input:hover {
+  border-color: var(--sep);
+}
+
+.field__input:focus {
+  border-color: var(--ink);
 }
 
 .field__input[type='number'] {
@@ -551,55 +634,62 @@
   justify-content: space-between;
   gap: 12px;
   min-height: 32px;
-  padding: 6px 0;
+  padding: 8px 0;
   border-top: 1px solid var(--hairline);
 }
 
 .toggle-row:first-child {
   padding-top: 0;
+  border-top: 0;
 }
 
 .toggle-row:last-child {
   padding-bottom: 0;
 }
 
-.toggle-row:first-child {
-  border-top: 0;
-}
-
 .toggle-row__label {
   color: var(--text);
-}
-
-.toggle-row__hint {
-  color: var(--text-2);
+  font-weight: 700;
   font-size: 12px;
 }
 
+.toggle-row__hint {
+  color: var(--text-3);
+  font-size: 11px;
+}
+
 /* ---- switch --------------------------------------------------------- */
+/* A squared toggle, so it sits with the 3 px corners everywhere else. */
 .switch {
   position: relative;
   width: 34px;
-  height: 20px;
-  border-radius: var(--radius-pill);
-  background: var(--hairline-strong);
+  height: 18px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--hairline-strong);
+  background: var(--control);
   flex: none;
-  transition: background 160ms ease;
+  transition: background 0.18s, border-color 0.18s;
 }
 
 .switch[aria-checked='true'] {
-  background: var(--accent);
+  background: var(--ink);
+  border-color: var(--ink);
 }
 
 .switch__knob {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--surface);
+  border: 1px solid var(--sep);
+}
+
+.switch[aria-checked='true'] .switch__knob {
+  background: var(--paper);
+  border-color: var(--paper);
 }
 
 /* ---- codex ---------------------------------------------------------- */
@@ -622,7 +712,8 @@
 }
 
 .activity__empty {
-  color: var(--text-2);
+  color: var(--text-3);
+  font-size: 12px;
 }
 
 .activity__row {
@@ -630,32 +721,33 @@
   grid-template-columns: 44px 6px minmax(0, 1fr);
   gap: 8px;
   align-items: start;
-  padding: 6px 0;
+  padding: 7px 0;
   border-top: 1px solid var(--hairline);
   font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .activity__row:first-child {
   border-top: 0;
+  padding-top: 0;
 }
 
 .activity__time {
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .activity__dot {
   width: 6px;
   height: 6px;
-  border-radius: 50%;
-  margin-top: 6px;
-  background: var(--text-2);
+  border-radius: 1px;
+  margin-top: 5px;
+  background: var(--sep);
 }
 
 .activity__dot--switch,
 .activity__dot--autoswap {
-  background: var(--accent);
+  background: var(--gold);
 }
 
 .activity__dot--error {
@@ -683,12 +775,11 @@
   align-items: center;
   gap: 10px;
   max-width: min(520px, calc(100vw - 48px));
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-card);
   background: var(--toast-bg);
   color: var(--toast-text);
-  box-shadow: var(--shadow-toast);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .toast--error {

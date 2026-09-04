@@ -1,5 +1,5 @@
 appId: com.aneesh.claude-swapper
-productName: Claude Swapper
+productName: Session Manager
 copyright: Copyright © 2026 Aneesh Iyer
 directories:
   buildResources: build

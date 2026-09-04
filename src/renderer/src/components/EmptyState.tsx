@@ -14,7 +14,7 @@ export function EmptyState({ actions, login }: Props) {
     <section className="card empty" aria-label="No accounts">
       <div className="empty__title">No accounts yet</div>
       <p className="empty__body">
-        Add the account Claude Code is logged in with, or log in to another one. Once two are here, Claude Swapper watches their
+        Add the account Claude Code is logged in with, or log in to another one. Once two are here, Session Manager watches their
         Fable runway and can switch before a window throttles you.
       </p>
       <div className="empty__actions">

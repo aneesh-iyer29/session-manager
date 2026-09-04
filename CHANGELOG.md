@@ -1,7 +1,17 @@
 # Changelog
 
-All notable changes to Claude Swapper are recorded here. The format follows
+All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
+
+## [0.2.0] - 2026-09-04
+
+### Changed
+
+- Renamed the app to Session Manager.
+- Restyled to the house idiom: paper ground, ink actions, Space Mono and Lora
+  (bundled), 3 px corners, no shadows or vibrancy; see `docs/DESIGN.md`.
+- App icon is now the brand mark on a full-bleed paper square; the menu bar glyph is the mark.
+- Press feedback is `scale(0.96)`; the refresh control uses an inline SVG icon.
 
 ## [0.1.0] - 2026-09-04
 

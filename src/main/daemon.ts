@@ -396,7 +396,7 @@ export class Daemon {
     if (!acc) {
       if (state.activeId !== null) {
         this.store.saveState({ ...state, activeId: null })
-        this.store.appendEvent('info', 'Claude Code is logged in as an account Claude Swapper does not track; use Capture to add it')
+        this.store.appendEvent('info', 'Claude Code is logged in as an account Session Manager does not track; use Capture to add it')
       }
       return
     }
@@ -519,7 +519,7 @@ export class Daemon {
     const acc = await switcher.switchTo(this.store, decision.targetId, this.switcherDeps())
     this.lastAttempt.delete(acc.id)
     this.store.appendEvent('autoswap', `auto-switched to ${acc.email}: ${decision.reason}`, acc.id)
-    if (settings.notify) this.notify('Claude Swapper', `Switched to ${acc.alias || acc.email}`)
+    if (settings.notify) this.notify('Session Manager', `Switched to ${acc.alias || acc.email}`)
   }
 
   private switcherDeps(): Partial<switcher.SwitcherDeps> {

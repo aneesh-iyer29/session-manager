@@ -18,7 +18,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
   app.on('second-instance', showWindow)
-  app.setName('Claude Swapper')
+  app.setName('Session Manager')
   void app.whenReady().then(main)
 }
 

@@ -349,9 +349,9 @@ export async function exchangeCode(
 }
 
 const DONE_HTML =
-  "<html><body style='font-family:system-ui'><h2>Signed in.</h2>You can close this tab and return to Claude Swapper.</body></html>"
+  "<html><body style='font-family:system-ui'><h2>Signed in.</h2>You can close this tab and return to Session Manager.</body></html>"
 const FAIL_HTML =
-  "<html><body style='font-family:system-ui'><h2>Login failed.</h2>Return to Claude Swapper and try again.</body></html>"
+  "<html><body style='font-family:system-ui'><h2>Login failed.</h2>Return to Session Manager and try again.</body></html>"
 
 export interface LoginFlowOptions {
   fetchFn?: FetchFn

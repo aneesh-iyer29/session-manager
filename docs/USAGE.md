@@ -1,4 +1,4 @@
-# Using Claude Swapper
+# Using Session Manager
 
 ## Adding accounts
 
@@ -67,7 +67,7 @@ panel only reports that it is configured. *Hide* in the panel header turns it of
 
 ## Menu bar
 
-Title: `<alias or email local-part> <binding pct>%`. Menu: Open Claude Swapper, Refresh
+Title: `<alias or email local-part> <binding pct>%`. Menu: Open Session Manager, Refresh
 now, Accounts ▸ (headroom per account; click to switch), Auto-swap, Launch at login, Quit.
 *Show in Dock* off hides the Dock icon; the app then lives only in the menu bar. Closing the
 window hides it; quit from the menu or ⌘Q.
@@ -91,7 +91,7 @@ window hides it; quit from the menu or ⌘Q.
 
 ## Files
 
-`~/Library/Application Support/Claude Swapper/` holds `settings.json`, `accounts.json`
+`~/Library/Application Support/Session Manager/` holds `settings.json`, `accounts.json`
 (no secrets), `credentials/` (0600 files), `usage.json`, `state.json`, and `events.jsonl`.
 Deleting the folder while the app is quit resets it; the app never
 touches Claude Code's own login.
