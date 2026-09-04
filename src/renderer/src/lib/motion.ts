@@ -9,4 +9,4 @@ export const spring: Transition = { type: 'spring', bounce: 0, duration: 0.4 }
 
 export const fade: Transition = { duration: 0.15 }
 
-export const tap = { scale: 0.97 }
+export const tap = { scale: 0.96 }

@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in Claude Swapper misbehaves
+description: Something in Session Manager misbehaves
 labels: [bug]
 body:
   - type: markdown

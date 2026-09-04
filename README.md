@@ -1,4 +1,4 @@
-# Claude Swapper
+# Session Manager
 
 A macOS menu bar app for people who run several Claude Code accounts. It watches the
 usage limits of every account, shows how much runway each one has left, and swaps the
@@ -20,20 +20,20 @@ Nothing leaves your machine except the calls to Anthropic's and OpenAI's own API
 
 ## Install
 
-**Download.** Grab `Claude Swapper-<version>-arm64.dmg` (or `x64`) from
+**Download.** Grab `Session Manager-<version>-arm64.dmg` (or `x64`) from
 [Releases](https://github.com/aneesh-iyer29/claude-swapper/releases), open it, and drag the
 app to Applications. Builds are unsigned, so the first launch needs either right-click →
 Open, or:
 
 ```sh
-xattr -dr com.apple.quarantine "/Applications/Claude Swapper.app"
+xattr -dr com.apple.quarantine "/Applications/Session Manager.app"
 ```
 
 **Build it yourself.** Requires Node 22 and macOS.
 
 ```sh
 npm install
-npm run dist          # → dist/Claude Swapper-<version>-arm64.dmg (and x64, and zips)
+npm run dist          # → dist/Session Manager-<version>-arm64.dmg (and x64, and zips)
 ```
 
 ## First run
@@ -95,7 +95,7 @@ Dock* off makes it a pure menu-bar app.
 
 | Path | Contents |
 | --- | --- |
-| `~/Library/Application Support/Claude Swapper/settings.json` | settings |
+| `~/Library/Application Support/Session Manager/settings.json` | settings |
 | `.../accounts.json` | account metadata, no secrets |
 | `.../credentials/<id>.json` | one credential per account, file mode 0600, directory 0700 |
 | `.../usage.json`, `state.json`, `events.jsonl` | last usage, active id, activity log |
@@ -129,7 +129,7 @@ npm run dev:web    # renderer only, in a browser with the mock backend (port 518
 npm run typecheck && npm run lint && npm test
 npm run build      # bundle to out/
 CLAUDE_SWAPPER_HOME=$(mktemp -d) npm run smoke   # launch headless against a scratch data dir
-npm run dist:dir   # unsigned dist/mac-arm64/Claude Swapper.app; npm run dist adds DMGs and zips
+npm run dist:dir   # unsigned dist/mac-arm64/Session Manager.app; npm run dist adds DMGs and zips
 ```
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DESIGN.md](docs/DESIGN.md),

@@ -1,35 +1,47 @@
-/* Design tokens from docs/DESIGN.md. macOS semantic colours so the app feels
-   native in both appearances; the dark block only swaps values. */
+/* Design tokens from docs/DESIGN.md — the Arcophos suite palette.
+   Paper ground, ink text, white boxes with a warm grey rule, one ochre highlight,
+   status colours in the same muted family. Light is canonical (the brand site is
+   light-only); the dark block is a faithful inversion in the same warm neutrals. */
 :root {
   color-scheme: light dark;
 
-  --bg: #f5f5f7;
-  --surface: rgba(255, 255, 255, 0.72);
+  --bg: #fbfaf7;
+  --surface: #ffffff;
   --surface-solid: #ffffff;
-  --text: #1d1d1f;
-  --text-2: #6e6e73;
-  --hairline: rgba(0, 0, 0, 0.08);
-  --hairline-strong: rgba(0, 0, 0, 0.14);
-  --accent: #5e5ce6;
-  --accent-tint: rgba(94, 92, 230, 0.12);
-  --ok: #34c759;
-  --warn: #ff9500;
-  --danger: #ff3b30;
-  --unknown: rgba(0, 0, 0, 0.18);
-  --track: rgba(0, 0, 0, 0.07);
-  --control: rgba(0, 0, 0, 0.05);
-  --control-hover: rgba(0, 0, 0, 0.09);
-  --toast-bg: rgba(29, 29, 31, 0.92);
-  --toast-text: #f5f5f7;
-  --shadow-hero: 0 1px 2px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.08);
-  --shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.18);
+  --surface-2: #f3f1ec;
+  --text: #232323;
+  --text-2: #514e47;
+  --text-3: #6c695f;
+  --hairline: #e1ded6;
+  --hairline-strong: #c7c4bb;
+  --sep: #b8b5ab;
+  --rule: #a6a399;
+  --ink: #232323;
+  --ink-hover: #3a3a3a;
+  --paper: #fbfaf7;
+  --accent: #232323;
+  --accent-tint: #e4e1d8;
+  --gold: #84754e;
+  --gold-tint: rgba(132, 117, 78, 0.14);
+  --ok: #3d6b51;
+  --warn: #84754e;
+  --danger: #96453c;
+  --danger-tint: rgba(150, 69, 60, 0.1);
+  --unknown: #c7c4bb;
+  --track: #e4e1d8;
+  --control: #f3f1ec;
+  --control-hover: #e4e1d8;
+  --toast-bg: #232323;
+  --toast-text: #fbfaf7;
+  --selection: #e4e1d8;
 
-  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-  --mono: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, monospace;
+  --font: 'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --mono: 'Space Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-brand: 'Lora', Georgia, 'Times New Roman', serif;
 
-  --radius-card: 12px;
-  --radius-control: 8px;
-  --radius-pill: 999px;
+  --radius-card: 3px;
+  --radius-control: 3px;
+  --radius-pill: 3px;
 
   --toolbar-h: 52px;
   --right-w: 320px;
@@ -37,25 +49,34 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #1c1c1e;
-    --surface: rgba(44, 44, 46, 0.66);
-    --surface-solid: #2c2c2e;
-    --text: #f5f5f7;
-    --text-2: #98989d;
-    --hairline: rgba(255, 255, 255, 0.1);
-    --hairline-strong: rgba(255, 255, 255, 0.18);
-    --accent: #6e6cf6;
-    --accent-tint: rgba(110, 108, 246, 0.2);
-    --ok: #30d158;
-    --warn: #ff9f0a;
-    --danger: #ff453a;
-    --unknown: rgba(255, 255, 255, 0.22);
-    --track: rgba(255, 255, 255, 0.1);
-    --control: rgba(255, 255, 255, 0.08);
-    --control-hover: rgba(255, 255, 255, 0.14);
-    --toast-bg: rgba(58, 58, 60, 0.96);
-    --toast-text: #f5f5f7;
-    --shadow-hero: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.35);
-    --shadow-toast: 0 4px 16px rgba(0, 0, 0, 0.5);
+    --bg: #1b1a18;
+    --surface: #232220;
+    --surface-solid: #232220;
+    --surface-2: #2a2926;
+    --text: #f3f1ec;
+    --text-2: #b8b5ab;
+    --text-3: #a6a399;
+    --hairline: #33312d;
+    --hairline-strong: #4a4740;
+    --sep: #5c594f;
+    --rule: #6c695f;
+    --ink: #f3f1ec;
+    --ink-hover: #dedbd3;
+    --paper: #1b1a18;
+    --accent: #f3f1ec;
+    --accent-tint: #33312d;
+    --gold: #b5a06b;
+    --gold-tint: rgba(181, 160, 107, 0.16);
+    --ok: #6fa583;
+    --warn: #b5a06b;
+    --danger: #c9736a;
+    --danger-tint: rgba(201, 115, 106, 0.14);
+    --unknown: #4a4740;
+    --track: #33312d;
+    --control: #2a2926;
+    --control-hover: #33312d;
+    --toast-bg: #f3f1ec;
+    --toast-text: #1b1a18;
+    --selection: #4a4740;
   }
 }

@@ -1,4 +1,4 @@
-# Claude Swapper — notes for Claude Code
+# Session Manager — notes for Claude Code
 
 macOS Electron + React + TypeScript app. Watches usage for many Claude Code accounts,
 auto-swaps the active login before the Fable weekly / 5-hour / weekly window bites, shows

@@ -54,7 +54,7 @@ function accountLabel(acc: Account): string {
 export function createTray(actions: TrayActions): Tray {
   if (tray) return tray
   tray = new Tray(templateImage())
-  tray.setToolTip('Claude Swapper')
+  tray.setToolTip('Session Manager')
   tray.on('click', actions.open)
   return tray
 }
@@ -69,7 +69,7 @@ export function updateTray(state: AppState, actions: TrayActions): void {
   }))
   tray.setContextMenu(
     Menu.buildFromTemplate([
-      { label: 'Open Claude Swapper', click: actions.open },
+      { label: 'Open Session Manager', click: actions.open },
       { label: 'Refresh now', click: actions.refresh },
       {
         label: 'Accounts',
@@ -89,7 +89,7 @@ export function updateTray(state: AppState, actions: TrayActions): void {
         click: (item) => actions.setLaunchAtLogin(item.checked),
       },
       { type: 'separator' },
-      { label: `Quit Claude Swapper ${app.getVersion()}`, click: actions.quit },
+      { label: `Quit Session Manager ${app.getVersion()}`, click: actions.quit },
     ]),
   )
 }

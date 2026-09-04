@@ -25,16 +25,28 @@ export function Toolbar({ state, now, actions }: Props) {
   const refreshing = actions.busy.has('refresh') || state.polling.inFlight
   return (
     <header className="toolbar">
-      <span className="toolbar__title">Claude Swapper</span>
+      <span className="toolbar__title">Session Manager</span>
       <div className="toolbar__controls">
         <ArmedPill armed={armed} />
         <span className="toolbar__age" aria-live="polite" title={state.polling.lastPollAt ? `Last poll ${new Date(state.polling.lastPollAt).toLocaleTimeString()}` : undefined}>
           {formatAgo(state.polling.lastPollAt, now)}
         </span>
         <Button size="sm" onClick={() => actions.refresh()} disabled={refreshing} aria-label="Refresh usage">
-          <span className={`btn__glyph${refreshing ? ' btn__glyph--spin' : ''}`} aria-hidden>
-            ⟳
-          </span>
+          <svg
+            className={`btn__glyph${refreshing ? ' btn__glyph--spin' : ''}`}
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <path d="M21 3v6h-6" />
+          </svg>
           Refresh
         </Button>
       </div>

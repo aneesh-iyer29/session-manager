@@ -2,11 +2,11 @@
 
 ## What the app handles
 
-Claude Swapper stores OAuth credentials for your Claude accounts and reads the Codex CLI's
+Session Manager stores OAuth credentials for your Claude accounts and reads the Codex CLI's
 login. They stay on your Mac:
 
 - Per-account credentials live in
-  `~/Library/Application Support/Claude Swapper/credentials/<id>.json`, mode 0600, in a
+  `~/Library/Application Support/Session Manager/credentials/<id>.json`, mode 0600, in a
   0700 directory. Writes are atomic.
 - The active credential is written to the macOS Keychain item Claude Code owns (service
   `Claude Code-credentials`), through `/usr/bin/security` with the secret passed on stdin

@@ -1,6 +1,6 @@
 # Architecture
 
-Claude Swapper is a macOS Electron app. It watches the usage limits of several Claude Code
+Session Manager is a macOS Electron app. It watches the usage limits of several Claude Code
 accounts, swaps the active account before the Fable weekly (or 5-hour / weekly) limit bites,
 and shows the one Codex account's quota read-only. It is deliberately narrow: **many Claude
 accounts, one Codex account, one model family (Fable) that gates swapping.**
@@ -41,7 +41,7 @@ docs/           this file, USAGE.md
 
 | Path | Purpose |
 | --- | --- |
-| `~/Library/Application Support/Claude Swapper/settings.json` | user settings |
+| `~/Library/Application Support/Session Manager/settings.json` | user settings |
 | `.../accounts.json` | account metadata list (no secrets) |
 | `.../credentials/<id>.json` | one credential blob per account, mode 0600 |
 | `.../usage.json` | last usage snapshot per account |
@@ -187,7 +187,7 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
   'active'`. Closing hides the window; the app keeps running in the tray. Quit from the tray
   menu or ⌘Q.
 * Tray title: `"<alias or email local-part> 63%"` where 63 is the active account's binding
-  window pct; a 16×16 template icon. Menu: Open Claude Swapper, Refresh now, Accounts ▸
+  window pct; a 16×16 template icon. Menu: Open Session Manager, Refresh now, Accounts ▸
   (each account with headroom, click to switch), Auto-swap on/off, Launch at login, Quit.
 * `showInDock=false` calls `app.dock.hide()` so the app is menu-bar only.
 * `launchAtLogin` uses `app.setLoginItemSettings`.
@@ -196,9 +196,9 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
 
 `npm run build` → `out/main/index.js`, `out/preload/index.mjs` (Electron needs the `.mjs`
 extension for an ESM preload), `out/renderer/`. `npm run dist:dir` → `dist/mac-arm64/Claude
-Swapper.app`; `npm run dist` → `dist/Claude Swapper-<version>-arm64.dmg` (and x64, and zips).
+Swapper.app`; `npm run dist` → `dist/Session Manager-<version>-arm64.dmg` (and x64, and zips).
 Builds are unsigned (`identity: null`); first launch needs right-click → Open, or
-`xattr -dr com.apple.quarantine "/Applications/Claude Swapper.app"`.
+`xattr -dr com.apple.quarantine "/Applications/Session Manager.app"`.
 
 ## Conventions
 

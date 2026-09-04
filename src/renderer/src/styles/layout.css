@@ -4,38 +4,42 @@
   flex-direction: column;
   height: 100%;
   min-width: 0;
+  background: var(--bg);
 }
 
 /* Toolbar sits under the hidden macOS title bar: drag region, 78 px reserved
-   for the traffic lights, controls opt out of dragging. */
+   for the traffic lights, controls opt out of dragging. A single rule under it,
+   like the site's navigation strip. */
 .toolbar {
   flex: none;
   height: var(--toolbar-h);
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px 0 78px;
-  border-bottom: 1px solid var(--hairline);
+  padding: 0 20px 0 78px;
+  border-bottom: 1px solid var(--hairline-strong);
   -webkit-app-region: drag;
 }
 
 .toolbar__title {
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
+  font-family: var(--font-brand);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: 0;
   margin-right: auto;
   white-space: nowrap;
+  color: var(--text);
 }
 
 .toolbar__controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   -webkit-app-region: no-drag;
 }
 
 .toolbar__age {
-  color: var(--text-2);
+  color: var(--text-3);
   font-family: var(--mono);
   font-size: 12px;
   min-width: 68px;
@@ -47,8 +51,8 @@
   min-height: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--right-w);
-  gap: 24px;
-  padding: 24px;
+  gap: 20px;
+  padding: 20px;
 }
 
 .col {
@@ -74,7 +78,7 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .section__head {
@@ -83,6 +87,8 @@
   justify-content: space-between;
   gap: 8px;
   min-height: 16px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--hairline);
 }
 
 .standby-grid {

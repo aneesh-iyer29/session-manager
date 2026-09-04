@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for helping. Claude Swapper is deliberately small; the best contributions keep it
+Thanks for helping. Session Manager is deliberately small; the best contributions keep it
 that way.
 
 ## Setup

@@ -1,4 +1,33 @@
-/* Reset, typography scale, focus ring. */
+/* Fonts (bundled, SIL Open Font License), reset, type roles, focus ring. */
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/i7dPIFZifjKcF5UAWdDRUEY.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../assets/fonts/i7dMIFZifjKcF5UAWdDRaPpZYFI.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Space Mono';
+  font-style: italic;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/i7dNIFZifjKcF5UAWdDRYER8QA.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/0QI6MX1D_JOuGQbT0gvTJPa787weuyJG.ttf') format('truetype');
+}
+
 *,
 *::before,
 *::after {
@@ -16,24 +45,27 @@ html {
   background: var(--bg);
 }
 
-/* Under Electron the window paints vibrancy behind a transparent page. */
+/* The window paints the same paper colour natively; the page ground is solid, no vibrancy. */
 html.electron {
-  /* A translucent tint over the window's vibrancy: the material shows through,
-     but the ground never reads as bare or washed out if vibrancy is unavailable. */
-  background: color-mix(in srgb, var(--bg) 60%, transparent);
+  background: var(--bg);
 }
 
 body {
   font-family: var(--font);
   font-size: 13px;
-  line-height: 1.4;
+  line-height: 1.5;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  font-variant-numeric: tabular-nums;
+  text-rendering: optimizeLegibility;
   overflow: hidden;
   user-select: none;
   -webkit-user-select: none;
+}
+
+::selection {
+  color: var(--text);
+  background: var(--selection);
 }
 
 button,
@@ -41,7 +73,6 @@ input,
 select {
   font: inherit;
   color: inherit;
-  font-variant-numeric: tabular-nums;
 }
 
 button {
@@ -53,7 +84,7 @@ button {
 }
 
 button:disabled {
-  opacity: 0.45;
+  opacity: 0.55;
 }
 
 input,
@@ -67,28 +98,37 @@ select {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 2px solid var(--ink);
   outline-offset: 2px;
   border-radius: var(--radius-control);
 }
 
+/* ---- type roles ------------------------------------------------------ */
 .mono {
   font-family: var(--mono);
   font-size: 12px;
 }
 
+/* Section labels: bold, uppercase, tracked — the brand's navigation voice. */
 .eyebrow {
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--text-2);
+  color: var(--text-3);
 }
 
 .title {
-  font-size: 17px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
   letter-spacing: -0.01em;
+}
+
+/* The serif is reserved for the wordmark and the one welcoming headline. */
+.brand {
+  font-family: var(--font-brand);
+  font-weight: 400;
+  letter-spacing: 0;
 }
 
 .text-2 {
