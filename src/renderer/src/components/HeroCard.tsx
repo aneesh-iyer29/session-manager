@@ -61,8 +61,6 @@ export function HeroCard({ account, settings, now, actions }: Props) {
         <Button size="sm" disabled={disabling} onClick={() => actions.setDisabled(account, !account.disabled)}>
           {account.disabled ? 'Return to rotation' : 'Hold out of rotation'}
         </Button>
-        <span className="spacer" />
-        <span className="badge">Active accounts can't be removed</span>
       </div>
     </motion.section>
   )

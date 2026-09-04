@@ -69,7 +69,7 @@ export function AutoswapPanel({ state, now, actions }: Props) {
         <div className="toggle-list">
           <Toggle
             label="Auto-swap"
-            hint={settings.autoswapEnabled ? 'Switches accounts on its own' : 'Only shows what it would do'}
+            hint={settings.autoswapEnabled ? 'Switches accounts on its own' : 'Off. Usage is still watched.'}
             checked={settings.autoswapEnabled}
             disabled={saving}
             onChange={(v) => quick({ autoswapEnabled: v }, v ? 'Auto-swap armed' : 'Auto-swap off')}
