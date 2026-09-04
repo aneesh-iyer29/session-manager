@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    # macOS because the main process is exercised by tests that assume darwin paths and tools.
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      # Launches the built app headless against a scratch data dir and expects the status line.
+      - run: CLAUDE_SWAPPER_HOME="$RUNNER_TEMP/swapper-home" npm run smoke | tee smoke.log && grep -q 'smoke: windows=1 tray=1' smoke.log

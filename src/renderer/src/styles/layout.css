@@ -1,0 +1,111 @@
+/* Window chrome and the two-column grid. */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+}
+
+/* Toolbar sits under the hidden macOS title bar: drag region, 78 px reserved
+   for the traffic lights, controls opt out of dragging. */
+.toolbar {
+  flex: none;
+  height: var(--toolbar-h);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px 0 78px;
+  border-bottom: 1px solid var(--hairline);
+  -webkit-app-region: drag;
+}
+
+.toolbar__title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-right: auto;
+  white-space: nowrap;
+}
+
+.toolbar__controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.toolbar__age {
+  color: var(--text-2);
+  font-family: var(--mono);
+  font-size: 12px;
+  min-width: 68px;
+  text-align: right;
+}
+
+.main {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--right-w);
+  gap: 24px;
+  padding: 24px;
+}
+
+.col {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  /* Room for the focus ring on the last control. */
+  padding-bottom: 4px;
+}
+
+.col--left {
+  min-width: 0;
+}
+
+.col--right {
+  width: var(--right-w);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 16px;
+}
+
+.standby-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 959px) {
+  .standby-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.toasts {
+  position: fixed;
+  top: calc(var(--toolbar-h) + 8px);
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  z-index: 10;
+}

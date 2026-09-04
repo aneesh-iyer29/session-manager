@@ -1,0 +1,708 @@
+/* Cards, meters, controls, panels, toasts. */
+
+/* ---- cards ---------------------------------------------------------- */
+.card {
+  background: var(--surface);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-card);
+  padding: 16px;
+  min-width: 0;
+}
+
+.card--hero {
+  box-shadow: var(--shadow-hero);
+}
+
+.card--disabled .gauge__number,
+.card--disabled .meter__fill {
+  opacity: 0.55;
+}
+
+.card__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+
+.card__identity {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.card__name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.card__identity > .card__email {
+  flex: 1 1 40px;
+}
+
+.card--hero .card__name {
+  font-size: 17px;
+}
+
+.card__email {
+  color: var(--text-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.card__meta {
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.card__actions .spacer {
+  flex: 1;
+}
+
+.card__note {
+  margin-top: 12px;
+  color: var(--text-2);
+}
+
+.card__note--danger {
+  color: var(--danger);
+}
+
+/* ---- gauge ---------------------------------------------------------- */
+.gauge {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.gauge__row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.gauge__number {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  min-width: 3ch;
+}
+
+.gauge--hero .gauge__number {
+  font-size: 56px;
+  letter-spacing: -0.03em;
+  min-width: 4ch;
+}
+
+.gauge__unit {
+  color: var(--text-2);
+}
+
+.gauge--hero .gauge__unit {
+  font-size: 15px;
+}
+
+.gauge__window {
+  color: var(--text-2);
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gauge__window .mono {
+  color: var(--text);
+}
+
+.gauge__number--ok {
+  color: var(--text);
+}
+.gauge__number--warn {
+  color: var(--warn);
+}
+.gauge__number--danger {
+  color: var(--danger);
+}
+.gauge__number--unknown {
+  color: var(--text-2);
+}
+
+/* ---- meters --------------------------------------------------------- */
+.meter {
+  position: relative;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--track);
+  overflow: hidden;
+  min-width: 0;
+}
+
+.meter--hero {
+  height: 10px;
+  border-radius: 5px;
+  margin-top: 12px;
+}
+
+.meter__fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--ok);
+}
+
+.meter__fill--warn {
+  background: var(--warn);
+}
+.meter__fill--danger {
+  background: var(--danger);
+}
+.meter__fill--unknown {
+  background: var(--unknown);
+}
+
+/* Autoswap threshold marker on the hero meter. */
+.meter__tick {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--text);
+  opacity: 0.35;
+}
+
+.meter-row {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr) 4ch auto;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+
+.meter-row__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.meter-row__pct {
+  text-align: right;
+  color: var(--text);
+}
+
+.meter-row__reset {
+  font-family: var(--mono);
+  font-size: 12px;
+  min-width: 6ch;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.meter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.meter-list--compact {
+  margin-top: 12px;
+  gap: 6px;
+}
+
+.meter-list--compact .meter-row {
+  grid-template-columns: 64px minmax(0, 1fr) 4ch auto;
+  font-size: 12px;
+}
+
+/* ---- pills & badges ------------------------------------------------- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  background: var(--control);
+  color: var(--text-2);
+}
+
+.pill--active {
+  background: var(--accent);
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pill--armed {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.pill--dry {
+  background: var(--control);
+  color: var(--warn);
+}
+
+.pill__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap;
+}
+
+.badge--danger {
+  color: var(--danger);
+}
+
+.badge--warn {
+  color: var(--warn);
+}
+
+/* ---- buttons -------------------------------------------------------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: var(--radius-control);
+  background: var(--control);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background 120ms ease;
+}
+
+.btn:hover:not(:disabled) {
+  background: var(--control-hover);
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: var(--accent);
+  filter: brightness(1.08);
+}
+
+.btn--quiet {
+  background: transparent;
+  color: var(--text-2);
+  padding: 0 8px;
+}
+
+.btn--quiet:hover:not(:disabled) {
+  color: var(--text);
+}
+
+.btn--danger {
+  color: var(--danger);
+}
+
+.btn--danger.btn--confirm {
+  background: var(--danger);
+  color: #fff;
+}
+
+.btn--sm {
+  height: 24px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.btn--icon {
+  width: 28px;
+  padding: 0;
+}
+
+.btn__glyph {
+  font-size: 15px;
+  line-height: 1;
+}
+
+.btn__glyph--spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn__glyph--spin {
+    animation: none;
+    opacity: 0.5;
+  }
+}
+
+/* ---- inline alias editing ------------------------------------------ */
+.name-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.name-edit__input {
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-solid);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  width: 160px;
+  min-width: 0;
+}
+
+/* The name wins the fight for space; the email shrinks first. */
+.name-edit__button {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 60%;
+  border-radius: 6px;
+  padding: 0 4px;
+  margin-left: -4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.name-edit__button:hover {
+  background: var(--control);
+}
+
+/* ---- add row -------------------------------------------------------- */
+.add-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--text-2);
+}
+
+.add-row__label {
+  font-weight: 500;
+  color: var(--text);
+}
+
+.add-row__hint {
+  font-size: 12px;
+}
+
+/* ---- empty state ---------------------------------------------------- */
+.empty {
+  padding: 32px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.empty__title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.empty__body {
+  color: var(--text-2);
+  max-width: 420px;
+}
+
+.empty__actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+/* ---- panels (right column) ----------------------------------------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.panel__summary {
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.panel__decision {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  color: var(--text-2);
+  line-height: 1.45;
+}
+
+.panel__decision-action {
+  flex: none;
+  font-weight: 500;
+  color: var(--text);
+  text-transform: capitalize;
+}
+
+.panel__decision-action--switch {
+  color: var(--accent);
+}
+
+.panel__decision-action--blocked {
+  color: var(--danger);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field__label {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.field__input {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--hairline-strong);
+  background: var(--surface-solid);
+  min-width: 0;
+  width: 100%;
+}
+
+.field__input[type='number'] {
+  text-align: right;
+}
+
+.panel__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel__actions .spacer {
+  flex: 1;
+}
+
+.toggle-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 32px;
+  padding: 6px 0;
+  border-top: 1px solid var(--hairline);
+}
+
+.toggle-row:first-child {
+  padding-top: 0;
+}
+
+.toggle-row:last-child {
+  padding-bottom: 0;
+}
+
+.toggle-row:first-child {
+  border-top: 0;
+}
+
+.toggle-row__label {
+  color: var(--text);
+}
+
+.toggle-row__hint {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+/* ---- switch --------------------------------------------------------- */
+.switch {
+  position: relative;
+  width: 34px;
+  height: 20px;
+  border-radius: var(--radius-pill);
+  background: var(--hairline-strong);
+  flex: none;
+  transition: background 160ms ease;
+}
+
+.switch[aria-checked='true'] {
+  background: var(--accent);
+}
+
+.switch__knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+/* ---- codex ---------------------------------------------------------- */
+.codex__identity {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.codex__identity .card__email {
+  flex: 1;
+}
+
+/* ---- activity ------------------------------------------------------- */
+.activity {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.activity__empty {
+  color: var(--text-2);
+}
+
+.activity__row {
+  display: grid;
+  grid-template-columns: 44px 6px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+  padding: 6px 0;
+  border-top: 1px solid var(--hairline);
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.activity__row:first-child {
+  border-top: 0;
+}
+
+.activity__time {
+  color: var(--text-2);
+}
+
+.activity__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  margin-top: 6px;
+  background: var(--text-2);
+}
+
+.activity__dot--switch,
+.activity__dot--autoswap {
+  background: var(--accent);
+}
+
+.activity__dot--error {
+  background: var(--danger);
+}
+
+.activity__dot--login,
+.activity__dot--capture {
+  background: var(--ok);
+}
+
+.activity__msg {
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.activity__msg--error {
+  color: var(--danger);
+}
+
+/* ---- toasts --------------------------------------------------------- */
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100vw - 48px));
+  padding: 8px 14px;
+  border-radius: 10px;
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  box-shadow: var(--shadow-toast);
+  font-size: 13px;
+}
+
+.toast--error {
+  border-left: 3px solid var(--danger);
+}
+
+.toast__close {
+  color: inherit;
+  opacity: 0.6;
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+}
+
+.toast__close:hover {
+  opacity: 1;
+}

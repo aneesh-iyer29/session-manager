@@ -2,11 +2,8 @@ node_modules/
 out/
 dist/
 *.log
+*.tsbuildinfo
 .DS_Store
 .vite/
 .eslintcache
 coverage/
-# never commit local state or credentials
-*.cswap
-credentials/
-accounts.json

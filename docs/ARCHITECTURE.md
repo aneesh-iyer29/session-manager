@@ -48,13 +48,19 @@ docs/           this file, USAGE.md
 | `.../state.json` | `activeId`, `lastSwitchAt`, `lastDecision` |
 | `.../events.jsonl` | append-only event log |
 | `~/.claude/` (or `$CLAUDE_CONFIG_DIR`) | Claude Code config home |
-| `~/.claude.json` | Claude Code global config; `oauthAccount` holds the active identity |
+| `~/.claude.json` (or `$CLAUDE_CONFIG_DIR/.claude.json`) | Claude Code global config; `oauthAccount` holds the active identity |
 | Keychain item service `Claude Code-credentials`, account `$USER` | Claude Code's active OAuth credential |
-| `~/.codex/auth.json` | Codex CLI login |
+| `~/.codex/auth.json` (or `$CODEX_HOME/auth.json`) | Codex CLI login |
 
-`CLAUDE_SWAPPER_HOME` overrides the data directory (used by tests).
+`CLAUDE_SWAPPER_HOME` overrides the data directory (used by tests and the smoke launch).
+`CLAUDE_SWAPPER_SMOKE_MS=<ms>` makes `index.ts` print one `smoke: windows=… tray=… rendererChars=…`
+line after that delay and quit (`CLAUDE_SWAPPER_SMOKE_PNG=<path>` also saves a screenshot);
+`npm run smoke` wraps it.
 
 ## Credential shapes
+
+The Keychain write goes through `security -i` with the value hex-encoded on stdin; a
+credential too large for that one line (> ~4 KiB) is refused rather than passed via argv.
 
 Claude Code active credential (Keychain value):
 
@@ -133,6 +139,9 @@ Pure functions, no I/O, fully unit-tested.
 
 `addFromActive(store)`: capture, fingerprint by sha256(refreshToken), upsert the account (same
 fingerprint or same `email+orgUuid` → update credential in place), mark it active.
+`addFromCredential(store, credential, identity?)` is the same upsert without marking active; a
+fresh browser login passes no identity and the profile API fills it in. These, `activeAccount`,
+`captureActive` and `switchTo` are all async.
 
 `switchTo(store, accountId)`:
 1. Take Claude Code's credential locks (`<config-home>/.oauth_refresh.lock` then
@@ -154,11 +163,22 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
 * Every `pollIntervalSeconds`: refresh usage for every enabled account (skip ones fetched
   < 60 s ago unless forced), refresh the Codex snapshot, then if `autoswapEnabled` run
   `decide` and perform the switch. Errors never kill the loop; they become `error` events.
+* Before polling, the live Keychain credential is matched to a stored account by fingerprint,
+  or by `activeId` when `~/.claude.json` still names that account's email (Claude Code rotated
+  the refresh token). A login that matches neither is *foreign*: `activeId` is cleared, an
+  `info` event is logged once, and no stored credential is overwritten.
+* An inactive account whose usage call returned 401 is marked `expired` and refreshed on the
+  next poll even if `expiresAt` still looks valid; `invalid_grant` marks it `dead` and it is
+  not retried until re-added. A failed Codex snapshot is held off for 5 minutes.
+* `pollIntervalSeconds` is capped at 86400 (a longer `setTimeout` overflows and fires at once).
 * Emits `stateChanged` after every mutation. The renderer never polls.
 * Sends a macOS notification (Electron `Notification`) on automatic switches when `notify`.
-* Login flow: `startLogin()` starts a one-shot HTTP server on `127.0.0.1:54545`, opens the
-  authorize URL with `shell.openExternal`, exchanges the code, fetches the profile, and adds
-  the account. Times out after 5 minutes.
+* Login flow: `startLogin()` cancels any pending login, starts a one-shot HTTP server on
+  `127.0.0.1:54545`, opens the authorize URL with `shell.openExternal`, exchanges the code,
+  fetches the profile, and adds the account. Times out after 5 minutes. Callbacks whose
+  `state` does not match are answered 400 and ignored (any local process or web page can
+  reach the port; it must not be able to complete *or* abort the login), and only the first
+  matching callback is exchanged.
 
 ## Window and tray
 
@@ -174,8 +194,10 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
 
 ## Packaging
 
-`npm run dist` → `dist/Claude Swapper-<version>-arm64.dmg` (and x64, and zips). Builds are
-unsigned; first launch needs right-click → Open, or
+`npm run build` → `out/main/index.js`, `out/preload/index.mjs` (Electron needs the `.mjs`
+extension for an ESM preload), `out/renderer/`. `npm run dist:dir` → `dist/mac-arm64/Claude
+Swapper.app`; `npm run dist` → `dist/Claude Swapper-<version>-arm64.dmg` (and x64, and zips).
+Builds are unsigned (`identity: null`); first launch needs right-click → Open, or
 `xattr -dr com.apple.quarantine "/Applications/Claude Swapper.app"`.
 
 ## Conventions
