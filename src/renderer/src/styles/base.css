@@ -45,9 +45,15 @@ html {
   background: var(--bg);
 }
 
-/* The window paints the same paper colour natively; the page ground is solid, no vibrancy. */
+/* Under Electron the window's vibrancy shows through a paper tint; in a plain browser the ground is solid. */
 html.electron {
-  background: var(--bg);
+  background: var(--ground-tint);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  html.electron {
+    background: var(--bg);
+  }
 }
 
 body {

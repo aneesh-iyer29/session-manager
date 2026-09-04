@@ -36,7 +36,7 @@ its left edge. Every other account repeats the same gauge at a smaller scale. Wh
 happens, the new active card rises to the hero slot with a critically damped layout spring; this
 is the one orchestrated moment in the app.
 
-**Paper, not glass.** The window is a solid paper ground in both appearances (no vibrancy). Light
+**Paper as glass.** The window shows macOS vibrancy through a paper tint; cards are translucent, blurred surfaces with a bright inset top edge, and `prefers-reduced-transparency` makes them solid. Light
 is canonical, matching the site; dark is a faithful inversion in the same warm neutrals.
 
 ## Tokens

@@ -2,7 +2,7 @@
  * The one dashboard window. Closing it only hides it: the daemon keeps polling
  * and the tray item stays, which is the whole point of a menu-bar utility.
  */
-import { BrowserWindow, app, nativeTheme, shell } from 'electron'
+import { BrowserWindow, app, shell } from 'electron'
 import { fileURLToPath } from 'node:url'
 
 let win: BrowserWindow | null = null
@@ -37,8 +37,10 @@ export function createWindow(): BrowserWindow {
     show: false,
     titleBarStyle: 'hiddenInset',
     trafficLightPosition: { x: 18, y: 18 },
-    // Solid paper ground, matching the renderer's --bg in each appearance; no vibrancy.
-    backgroundColor: nativeTheme.shouldUseDarkColors ? '#1b1a18' : '#fbfaf7',
+    // macOS material behind a translucent paper tint; the renderer paints glass surfaces over it.
+    vibrancy: 'under-window',
+    visualEffectState: 'active',
+    backgroundColor: '#00000000',
     webPreferences: {
       preload: fileURLToPath(new URL('../preload/index.mjs', import.meta.url)),
       contextIsolation: true,

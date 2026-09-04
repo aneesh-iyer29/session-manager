@@ -4,7 +4,6 @@
   flex-direction: column;
   height: 100%;
   min-width: 0;
-  background: var(--bg);
 }
 
 /* Toolbar sits under the hidden macOS title bar: drag region, 104 px reserved
@@ -18,6 +17,9 @@
   gap: 12px;
   padding: 0 20px 0 104px;
   border-bottom: 1px solid var(--hairline-strong);
+  background: var(--surface-2);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
   -webkit-app-region: drag;
 }
 
