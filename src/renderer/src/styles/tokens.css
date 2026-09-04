@@ -6,9 +6,12 @@
   color-scheme: light dark;
 
   --bg: #fbfaf7;
-  --surface: #ffffff;
+  --surface: rgba(255, 255, 255, 0.58);
   --surface-solid: #ffffff;
-  --surface-2: #f3f1ec;
+  --surface-2: rgba(243, 241, 236, 0.6);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 1px 2px rgba(35, 35, 35, 0.04), 0 12px 32px rgba(35, 35, 35, 0.06);
+  --ground-tint: rgba(251, 250, 247, 0.55);
   --text: #232323;
   --text-2: #514e47;
   --text-3: #6c695f;
@@ -50,9 +53,12 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --bg: #1b1a18;
-    --surface: #232220;
+    --surface: rgba(38, 37, 34, 0.5);
     --surface-solid: #232220;
-    --surface-2: #2a2926;
+    --surface-2: rgba(42, 41, 38, 0.6);
+    --glass-edge: rgba(255, 255, 255, 0.09);
+    --glass-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 12px 32px rgba(0, 0, 0, 0.28);
+    --ground-tint: rgba(27, 26, 24, 0.5);
     --text: #f3f1ec;
     --text-2: #b8b5ab;
     --text-3: #a6a399;
