@@ -1,14 +1,12 @@
-__pycache__/
-*.pyc
-.venv/
+node_modules/
+out/
 dist/
-build/
-*.egg-info/
-.pytest_cache/
-.ruff_cache/
-.DS_Store
 *.log
-# never commit credentials or local state
+.DS_Store
+.vite/
+.eslintcache
+coverage/
+# never commit local state or credentials
 *.cswap
 credentials/
 accounts.json
