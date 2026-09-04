@@ -7,7 +7,7 @@
   background: var(--bg);
 }
 
-/* Toolbar sits under the hidden macOS title bar: drag region, 78 px reserved
+/* Toolbar sits under the hidden macOS title bar: drag region, 104 px reserved
    for the traffic lights, controls opt out of dragging. A single rule under it,
    like the site's navigation strip. */
 .toolbar {
@@ -16,7 +16,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 20px 0 78px;
+  padding: 0 20px 0 104px;
   border-bottom: 1px solid var(--hairline-strong);
   -webkit-app-region: drag;
 }
