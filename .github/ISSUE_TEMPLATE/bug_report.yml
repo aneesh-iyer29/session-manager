@@ -1,0 +1,58 @@
+name: Bug report
+description: Something in Claude Swapper misbehaves
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Please never paste tokens, Keychain contents, or credential files.
+        Activity log lines are safe; they contain email addresses at most.
+  - type: input
+    id: version
+    attributes:
+      label: App version
+      description: Shown on the menu bar Quit item
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: 26.0 (Apple silicon)
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you saw.
+    validations:
+      required: true
+  - type: textarea
+    id: activity
+    attributes:
+      label: Activity log
+      description: Relevant lines from the Activity panel (redact emails if you like).
+      render: text
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Switching / Keychain
+        - Auto-swap policy
+        - Browser login
+        - Usage numbers
+        - Codex panel
+        - Menu bar / window
+        - Packaging / install
+        - Other
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I am on the latest release
+        - label: I have not included any secrets above
+          required: true

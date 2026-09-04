@@ -22,7 +22,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "dist": "npm run build && electron-builder --mac",
-    "dist:dir": "npm run build && electron-builder --mac --dir"
+    "dist:dir": "npm run build && electron-builder --mac --dir",
+    "smoke": "npm run build && CLAUDE_SWAPPER_SMOKE_MS=8000 ELECTRON_ENABLE_LOGGING=1 electron ."
   },
   "dependencies": {
     "motion": "^13.0.0",

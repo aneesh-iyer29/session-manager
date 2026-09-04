@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <!-- Claude Swapper app icon: system indigo ground, two cards with the front one swapped forward. -->
+  <defs>
+    <clipPath id="squircle">
+      <path d="M512 0C143 0 0 143 0 512s143 512 512 512 512-143 512-512S881 0 512 0z"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#squircle)">
+    <rect width="1024" height="1024" fill="#5E5CE6"/>
+  </g>
+  <!-- back card -->
+  <rect x="236" y="196" width="520" height="400" rx="64" fill="#FFFFFF" fill-opacity="0.42"/>
+  <!-- front card -->
+  <rect x="332" y="336" width="520" height="400" rx="64" fill="#FFFFFF"/>
+  <!-- meter on the front card: a filled track that reads as "runway" -->
+  <rect x="404" y="632" width="376" height="36" rx="18" fill="#5E5CE6" fill-opacity="0.18"/>
+  <rect x="404" y="632" width="232" height="36" rx="18" fill="#5E5CE6"/>
+</svg>
