@@ -18,7 +18,9 @@ html {
 
 /* Under Electron the window paints vibrancy behind a transparent page. */
 html.electron {
-  background: transparent;
+  /* A translucent tint over the window's vibrancy: the material shows through,
+     but the ground never reads as bare or washed out if vibrancy is unavailable. */
+  background: color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
 body {

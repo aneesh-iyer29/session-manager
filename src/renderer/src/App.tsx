@@ -54,7 +54,6 @@ function Dashboard({ state }: { state: AppState }) {
             <section className="section" aria-label="Active">
               <div className="section__head">
                 <span className="eyebrow">Active</span>
-                {active ? <span className="badge">v{state.version}</span> : null}
               </div>
               {active ? <HeroCard account={active} settings={state.settings} now={now} actions={actions} /> : null}
               {!active && state.accounts.length === 0 ? <EmptyState actions={actions} login={login} /> : null}
