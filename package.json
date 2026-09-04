@@ -1,0 +1,47 @@
+{
+  "name": "claude-swapper",
+  "productName": "Claude Swapper",
+  "version": "0.1.0",
+  "description": "Usage dashboard and auto-swapper for multiple Claude Code accounts, with a read-only Codex quota view",
+  "main": "./out/main/index.js",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "author": "Aneesh Iyer",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aneesh-iyer29/claude-swapper.git"
+  },
+  "scripts": {
+    "dev": "electron-vite dev",
+    "dev:web": "vite --config vite.web.config.ts",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
+    "lint": "eslint .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "dist": "npm run build && electron-builder --mac",
+    "dist:dir": "npm run build && electron-builder --mac --dir"
+  },
+  "dependencies": {
+    "motion": "^13.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "electron": "^44.0.0",
+    "electron-builder": "^26.0.0",
+    "electron-vite": "^5.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.0.0",
+    "vite": "^7.0.0",
+    "vitest": "^4.0.0"
+  }
+}

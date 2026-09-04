@@ -1,0 +1,35 @@
+appId: com.aneesh.claude-swapper
+productName: Claude Swapper
+copyright: Copyright © 2026 Aneesh Iyer
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**
+  - package.json
+  - "!**/*.map"
+asar: true
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+    - target: zip
+      arch: [arm64, x64]
+  icon: build/icon.icns
+  # Unsigned local build: no Apple Developer identity on this machine.
+  identity: null
+  hardenedRuntime: false
+  gatekeeperAssess: false
+  extendInfo:
+    LSUIElement: false
+    NSHumanReadableCopyright: Copyright © 2026 Aneesh Iyer
+dmg:
+  sign: false
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

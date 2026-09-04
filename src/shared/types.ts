@@ -1,0 +1,147 @@
+/**
+ * Shared data model. This file is the contract between the main process, the
+ * preload bridge, and the renderer. Every process imports from here and nobody
+ * redefines these shapes. Keep it dependency-free.
+ */
+
+/** One rate-limit window as reported by a provider, normalized. `pct` is 0-100 used. */
+export interface UsageWindow {
+  /** `five_hour`, `seven_day`, or `model:<display name lowercased>` (e.g. `model:fable`). */
+  key: string
+  /** Human label: "5-hour", "Weekly", "Fable weekly". */
+  label: string
+  pct: number
+  /** ISO timestamp when the window resets, or null when unknown. */
+  resetsAt: string | null
+}
+
+export interface Usage {
+  fetchedAt: string
+  ok: boolean
+  /** Short, secret-free error description when `ok` is false. */
+  error: string | null
+  windows: UsageWindow[]
+  /** Subscription tier as reported by the provider ("max", "pro", ...), if known. */
+  plan: string | null
+}
+
+export type TokenStatus = 'ok' | 'expired' | 'dead' | 'unknown'
+
+export interface Account {
+  /** Stable id like `acc_3`. */
+  id: string
+  email: string
+  alias: string
+  orgName: string
+  orgUuid: string
+  accountUuid: string
+  plan: string | null
+  /** True when this account's credential is the one Claude Code is using right now. */
+  active: boolean
+  /** Held out of auto-rotation. Still a valid manual switch target. */
+  disabled: boolean
+  addedAt: string
+  tokenStatus: TokenStatus
+  usage: Usage | null
+  /** 100 - max(pct of gating windows), or null when usage is unknown. */
+  headroom: number | null
+  /** Key of the gating window with the least headroom, or null. */
+  bindingWindow: string | null
+}
+
+export type CodexMode = 'chatgpt' | 'apikey' | 'none'
+
+export interface CodexState {
+  configured: boolean
+  mode: CodexMode
+  email: string | null
+  plan: string | null
+  usage: Usage | null
+}
+
+export type Strategy = 'best' | 'consume_first'
+
+export interface Settings {
+  autoswapEnabled: boolean
+  dryRun: boolean
+  /** 50-100. An account is "near limit" when any gating window reaches this. */
+  threshold: number
+  /** 0-50. A switch target must beat the active account's headroom by this much. */
+  margin: number
+  /** >= 0. Minimum seconds between automatic switches. */
+  cooldownSeconds: number
+  /** >= 15. */
+  pollIntervalSeconds: number
+  strategy: Strategy
+  /** Display name of the per-model weekly window that gates swapping. Default "Fable". */
+  model: string
+  codexEnabled: boolean
+  notify: boolean
+  launchAtLogin: boolean
+  showInDock: boolean
+}
+
+export type DecisionAction = 'stay' | 'switch' | 'blocked'
+
+export interface Decision {
+  action: DecisionAction
+  targetId: string | null
+  reason: string
+  at: string
+}
+
+export type EventKind = 'switch' | 'autoswap' | 'error' | 'login' | 'capture' | 'info'
+
+export interface SwapperEvent {
+  id: string
+  at: string
+  kind: EventKind
+  message: string
+  accountId: string | null
+}
+
+export interface AppState {
+  version: string
+  now: string
+  activeId: string | null
+  polling: {
+    lastPollAt: string | null
+    nextPollAt: string | null
+    inFlight: boolean
+  }
+  autoswap: {
+    lastDecision: Decision | null
+    lastSwitchAt: string | null
+  }
+  settings: Settings
+  accounts: Account[]
+  codex: CodexState
+  /** Newest first, at most 100. */
+  events: SwapperEvent[]
+}
+
+export type LoginPhase = 'pending' | 'done' | 'error'
+
+export interface LoginStatus {
+  id: string
+  status: LoginPhase
+  /** Authorize URL; the main process also opens it in the default browser. */
+  url: string
+  account?: Account
+  error?: string
+}
+
+export const DEFAULT_SETTINGS: Settings = {
+  autoswapEnabled: false,
+  dryRun: false,
+  threshold: 90,
+  margin: 10,
+  cooldownSeconds: 300,
+  pollIntervalSeconds: 60,
+  strategy: 'best',
+  model: 'Fable',
+  codexEnabled: true,
+  notify: true,
+  launchAtLogin: false,
+  showInDock: true,
+}
