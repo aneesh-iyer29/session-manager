@@ -25,7 +25,7 @@ export function Gauge({ account, now, threshold, hero = false }: Props) {
     <div className={`gauge${hero ? ' gauge--hero' : ''}`}>
       <div className="gauge__row">
         <span className={`gauge__number gauge__number--${bucket}`} aria-label={headroom == null ? 'Headroom unknown' : `${headroom}% headroom`}>
-          {headroom == null ? '—' : `${Math.round(headroom)}%`}
+          {headroom == null ? '—' : `${binding?.estimated ? '≈' : ''}${Math.round(headroom)}%`}
         </span>
         <span className="gauge__unit">headroom</span>
       </div>

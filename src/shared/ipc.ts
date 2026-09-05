@@ -22,6 +22,8 @@ export const IPC = {
   openDataFolder: 'swapper:openDataFolder',
   installHook: 'swapper:installHook',
   uninstallHook: 'swapper:uninstallHook',
+  installFeed: 'swapper:installFeed',
+  uninstallFeed: 'swapper:uninstallFeed',
   /** main → renderer push, payload: AppState */
   stateChanged: 'swapper:stateChanged',
 } as const
@@ -47,6 +49,9 @@ export interface SwapperApi {
   /** Write the compact-nudge hook script and register it in ~/.claude/settings.json. */
   installHook(): Promise<AppState>
   uninstallHook(): Promise<AppState>
+  /** Register the status line script that feeds the active account's usage without polling. */
+  installFeed(): Promise<AppState>
+  uninstallFeed(): Promise<AppState>
   /** Subscribe to state pushes. Returns an unsubscribe function. */
   onState(callback: (state: AppState) => void): () => void
 }

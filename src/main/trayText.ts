@@ -9,7 +9,7 @@ export type Tone = 'ok' | 'warn' | 'danger' | 'unknown'
 
 export type MenuRow =
   | { kind: 'header'; title: string; right: string }
-  | { kind: 'window'; label: string; right: string; pct: number | null; tone: Tone }
+  | { kind: 'window'; label: string; right: string; pct: number | null; tone: Tone; estimated?: boolean }
   | { kind: 'status'; text: string }
 
 /** Points. Width matches a comfortable NSMenu; heights give each row its own line. */
@@ -127,7 +127,7 @@ export function menuRows(state: AppState, now: Date): MenuRow[] {
     const windows = orderedWindows(acc)
     if (windows.length === 0) rows.push({ kind: 'status', text: acc.usage?.error ?? 'Usage not fetched yet' })
     for (const w of windows) {
-      rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold) })
+      rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold), estimated: w.estimated === true })
     }
   }
   if (state.settings.codexEnabled) {
@@ -135,7 +135,7 @@ export function menuRows(state: AppState, now: Date): MenuRow[] {
     rows.push({ kind: 'header', title: h.title, right: h.right })
     if (state.codex.usage) {
       for (const w of orderedWindows({ usage: state.codex.usage })) {
-        rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold) })
+        rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold), estimated: w.estimated === true })
       }
     }
   }
@@ -172,7 +172,7 @@ export function rowsHtml(rows: MenuRow[], dark: boolean, zoom = 2): string {
         return `<div class="row status" style="height:${h}px"><span class="r">${esc(row.text)}</span></div>`
       }
       const pct = row.pct === null ? 0 : Math.max(0, Math.min(100, row.pct))
-      const pctText = row.pct === null ? '–' : `${Math.round(row.pct)}%`
+      const pctText = row.pct === null ? '–' : `${row.estimated ? '≈' : ''}${Math.round(row.pct)}%`
       return (
         `<div class="row window" style="height:${h}px">` +
         `<div class="line"><span class="t">${esc(row.label)}</span><span class="r">${esc(row.right)}${row.right ? '&nbsp;&nbsp;' : ''}<b>${pctText}</b></span></div>` +

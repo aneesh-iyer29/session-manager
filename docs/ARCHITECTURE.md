@@ -182,6 +182,30 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
   reach the port; it must not be able to complete *or* abort the login), and only the first
   matching callback is exchanged.
 
+## Live status line feed (`src/main/liveUsage.ts`)
+
+Claude Code passes its status line script a JSON document that includes `rate_limits.five_hour`
+and `rate_limits.seven_day` (`used_percentage`, `resets_at` epoch seconds), taken from the
+rate-limit headers on every API response. That is the active account's usage with no request
+against the usage endpoint's budget (~30/hour per token), refreshed on every assistant message.
+
+* `installFeed()` writes `~/.claude/hooks/session-manager-statusline.sh` and sets
+  `statusLine` in `~/.claude/settings.json` to it. An existing status line command is saved
+  to `<dataDir>/statusline-chain.json` and run by our script with the same stdin, so the user
+  sees no change; `uninstallFeed()` restores it.
+* The script copies stdin to `<dataDir>/statusline.json` (temp + rename) and prints a compact
+  usage line (via jq or python3) or the chained command's output. Bash only.
+* The daemon watches the data dir (`fs.watch`, 400 ms debounce) and on each write merges the
+  feed's 5h/7d windows into the active account's usage, keeping the per-model window from the
+  last endpoint fetch, then re-runs the swap decision and the nudge. Feeds older than 6 h are
+  ignored. While the feed is under 15 min old the active account's endpoint fetch gap grows
+  to 30 min (only the model window still needs it), and an endpoint result never overwrites
+  fresher live windows.
+* Between endpoint polls the model window is projected: `model = anchor.model +
+  2 × (liveWeekly − anchor.weekly)`, clamped, where the anchor is the last endpoint-reported
+  (model, weekly) pair. Fable's weekly cap is about half the all-models cap and these accounts
+  run Fable almost exclusively. Projected windows carry `estimated: true` and render with ≈.
+
 ## Compact nudge (`src/main/nudge.ts`)
 
 A swap mid-conversation makes the next request re-cache the whole context on the new account.

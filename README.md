@@ -84,6 +84,12 @@ can't corrupt either. Before overwriting, the live credential is saved back into
 outgoing account's slot so a token Claude Code rotated is not lost. Running Claude Code
 sessions pick up the new login on their next request.
 
+## Live usage without polling
+
+Install the status line feed from the Auto-swap panel and Claude Code hands the app its own
+rate-limit numbers on every message. The active account updates instantly and the usage
+endpoint is only asked about the Fable window, every 30 minutes.
+
 ## Compact before the swap
 
 Swapping mid-conversation costs one full re-cache of that conversation on the new account.

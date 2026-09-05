@@ -61,6 +61,17 @@ account is fetched at most every 5 min and standby accounts every 10 min unless 
 points of the threshold. Accounts fetched within those gaps are
 skipped unless you press Refresh.
 
+## Live usage from Claude Code
+
+Claude Code already knows your 5-hour and weekly usage from every response it gets. Click
+**Install** on "Claude Code status line feed" in the Auto-swap panel and it hands those
+numbers to Session Manager on every assistant message, so the active account updates
+live and the app polls Anthropic only for the Fable window (every 30 min). Between those
+polls the Fable window is projected from the live weekly number, two Fable points per weekly
+point, anchored at the last real reading, and shown with a ≈ mark. If you already
+have a status line, it keeps running underneath ours; Remove restores it. Standby accounts
+are still polled, since Claude Code only knows about the account it is logged in with.
+
 ## Compact nudge
 
 A swap in the middle of a long Claude Code conversation makes the next request re-cache the

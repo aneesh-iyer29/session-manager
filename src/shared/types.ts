@@ -13,6 +13,8 @@ export interface UsageWindow {
   pct: number
   /** ISO timestamp when the window resets, or null when unknown. */
   resetsAt: string | null
+  /** True when projected from another window rather than reported (see the Fable estimate). */
+  estimated?: boolean
 }
 
 export interface Usage {
@@ -101,6 +103,14 @@ export interface NudgeFlag {
   message: string
 }
 
+/** The Claude Code status line feed: live 5-hour / weekly usage for the active account. */
+export interface LiveFeedState {
+  /** Whether our status line script is registered in ~/.claude/settings.json. */
+  installed: boolean
+  /** When Claude Code last wrote usage, or null. */
+  lastAt: string | null
+}
+
 export interface NudgeState {
   /** Whether the UserPromptSubmit hook is present in ~/.claude/settings.json. */
   hookInstalled: boolean
@@ -143,6 +153,7 @@ export interface AppState {
   accounts: Account[]
   codex: CodexState
   nudge: NudgeState
+  liveFeed: LiveFeedState
   /** Newest first, at most 100. */
   events: SwapperEvent[]
 }

@@ -24,6 +24,9 @@ import * as claudeOauth from './claudeOauth'
 import * as codex from './codex'
 import * as switcher from './switcher'
 import * as nudge from './nudge'
+import * as live from './liveUsage'
+import { watch, type FSWatcher } from 'node:fs'
+import { dataDir } from './paths'
 import * as autoswap from './autoswap'
 import { readActiveCredential, writeActiveCredential } from './keychain'
 
@@ -36,6 +39,17 @@ import { readActiveCredential, writeActiveCredential } from './keychain'
 const MIN_FETCH_GAP_MS = 5 * 60_000
 /** Standby accounts change slowly; poll them every ten minutes unless they are close to the line. */
 const STANDBY_FETCH_GAP_MS = 10 * 60_000
+/** With the status line feed fresh, the endpoint is only needed for the per-model window. */
+const LIVE_FED_FETCH_GAP_MS = 30 * 60_000
+const LIVE_FRESH_MS = 15 * 60_000
+/**
+ * Between endpoint polls the per-model (Fable) window is projected from the live
+ * weekly window: these accounts run Fable almost exclusively, and the Fable
+ * weekly cap is about half the all-models cap, so each weekly point is worth two
+ * Fable points. Anchored at the last real pair so the projection never drifts
+ * beyond one poll interval.
+ */
+const MODEL_PER_WEEKLY = 2
 const NEAR_LINE_PTS = 10
 /** Fallback back-off after a 429 without a Retry-After. */
 const RATE_LIMIT_BACKOFF_MS = 10 * 60_000
@@ -195,6 +209,11 @@ export class Daemon {
   private codexState: CodexState = EMPTY_CODEX
   private codexBackoffUntil = 0
   private readonly logins = new Map<string, LoginRecord>()
+  private liveWatcher: FSWatcher | null = null
+  private liveTimer: NodeJS.Timeout | null = null
+  private liveAppliedAt = 0
+  /** Last endpoint-reported (model, weekly) pair per account, the anchor for the projection. */
+  private readonly modelAnchor = new Map<string, { key: string; model: number; weekly: number }>()
 
   constructor(opts: DaemonOptions) {
     this.store = opts.store
@@ -213,12 +232,17 @@ export class Daemon {
 
   /** Start polling: one poll now, then a setTimeout chain (never setInterval, so a slow poll can't pile up). */
   start(): void {
+    this.watchLive()
     if (this.running) return
     this.running = true
     void this.poll(true).finally(() => this.schedule())
   }
 
   stop(): void {
+    this.liveWatcher?.close()
+    this.liveWatcher = null
+    if (this.liveTimer) clearTimeout(this.liveTimer)
+    this.liveTimer = null
     this.running = false
     if (this.timer) clearTimeout(this.timer)
     this.timer = null
@@ -313,6 +337,7 @@ export class Daemon {
       accounts,
       codex: this.codexState,
       nudge: { hookInstalled: nudge.isHookInstalled(), pending: nudge.readFlag() },
+      liveFeed: { installed: live.isFeedInstalled(), lastAt: (() => { const f = live.readLive(dataDir(), this.now()); return f ? iso(f.at) : null })() },
       events: this.store.readEvents(EVENT_LIMIT),
     }
   }
@@ -361,6 +386,7 @@ export class Daemon {
       const settings = this.settings()
       const now = this.now()
       await this.guard('sync active credential', () => this.syncActiveCredential())
+      await this.guard('live usage', async () => void this.applyLive())
       const activeId = this.store.loadState().activeId
       const usageNow = this.store.loadUsage()
       for (const acc of this.store.listAccounts()) {
@@ -393,7 +419,7 @@ export class Daemon {
    * on it. Keeps the usage endpoint's budget intact with many accounts.
    */
   private fetchGap(acc: StoredAccount, activeId: string | null, usage: Usage | null, settings: Settings): number {
-    if (acc.id === activeId) return MIN_FETCH_GAP_MS
+    if (acc.id === activeId) return this.liveIsFresh() ? LIVE_FED_FETCH_GAP_MS : MIN_FETCH_GAP_MS
     const worst = autoswap.bindingWindow(usage, settings.model)
     if (worst && worst.pct >= settings.threshold - NEAR_LINE_PTS) return MIN_FETCH_GAP_MS
     return STANDBY_FETCH_GAP_MS
@@ -484,7 +510,19 @@ export class Daemon {
     }
     try {
       const raw = await claudeOauth.fetchUsage(token, this.fetchFn)
-      this.recordUsage(acc, claudeOauth.normalizeUsage(raw, settings.model), null, 'ok')
+      let usage = claudeOauth.normalizeUsage(raw, settings.model)
+      const modelKey = `model:${settings.model.toLowerCase()}`
+      const modelWin = usage.windows.find((w) => w.key === modelKey)
+      const weeklyWin = usage.windows.find((w) => w.key === 'seven_day')
+      if (modelWin && weeklyWin) this.modelAnchor.set(acc.id, { key: modelKey, model: modelWin.pct, weekly: weeklyWin.pct })
+      else this.modelAnchor.delete(acc.id)
+      // The status line is the fresher source for the active account's 5h/7d windows.
+      const feed = isActive ? live.readLive(dataDir(), this.now()) : null
+      if (feed && this.now().getTime() - feed.at.getTime() < LIVE_FRESH_MS) {
+        const liveKeys = new Set(feed.windows.map((w) => w.key))
+        usage = { ...usage, windows: [...feed.windows, ...usage.windows.filter((w) => !liveKeys.has(w.key))] }
+      }
+      this.recordUsage(acc, usage, null, 'ok')
     } catch (err) {
       const ue = err instanceof claudeOauth.UsageError ? err : claudeOauth.classifyUsageError(err)
       let message = describe(ue)
@@ -576,6 +614,94 @@ export class Daemon {
     if (!previous || previous.id !== flag.id) {
       this.store.appendEvent('info', `Compact nudge raised: ${flag.message}`, active.id)
     }
+  }
+
+  /**
+   * Follow Claude Code's status line file. `fs.watch` on the data dir fires for
+   * the rename that lands each atomic write; a short debounce coalesces bursts
+   * from several sessions. Applying is cheap, so the UI updates within a second
+   * of Claude Code learning new numbers.
+   */
+  private watchLive(): void {
+    if (this.liveWatcher) return
+    try {
+      this.liveWatcher = watch(dataDir(), (_event, filename) => {
+        if (filename !== live.LIVE_FILE) return
+        if (this.liveTimer) clearTimeout(this.liveTimer)
+        this.liveTimer = setTimeout(() => {
+          this.liveTimer = null
+          this.guard('live usage', async () => {
+            if (this.applyLive()) {
+              const settings = this.settings()
+              if (settings.autoswapEnabled) await this.runAutoswap(settings)
+              this.updateNudge(settings)
+              this.emit()
+            }
+          }).catch(() => undefined)
+        }, 400)
+      })
+      this.liveWatcher.on('error', () => {
+        this.liveWatcher = null
+      })
+    } catch {
+      this.liveWatcher = null
+    }
+  }
+
+  /**
+   * Merge the status line's 5-hour / weekly windows into the active account's
+   * stored usage. Windows the feed does not carry (the per-model one) are kept
+   * from the last endpoint fetch. Returns true when something changed.
+   */
+  private applyLive(): boolean {
+    const feed = live.readLive(dataDir(), this.now())
+    if (!feed || feed.at.getTime() <= this.liveAppliedAt) return false
+    const state = this.store.loadState()
+    if (!state.activeId) return false
+    const acc = this.store.getAccount(state.activeId)
+    if (!acc) return false
+    const all = this.store.loadUsage()
+    const previous = all[acc.id]
+    const liveKeys = new Set(feed.windows.map((w) => w.key))
+    const anchor = this.modelAnchor.get(acc.id)
+    const liveWeekly = feed.windows.find((w) => w.key === 'seven_day')
+    const kept = (previous?.windows ?? [])
+      .filter((w) => !liveKeys.has(w.key))
+      .map((w) => {
+        if (!anchor || !liveWeekly || w.key !== anchor.key) return w
+        const projected = Math.max(0, Math.min(100, anchor.model + MODEL_PER_WEEKLY * (liveWeekly.pct - anchor.weekly)))
+        return { ...w, pct: Math.round(projected * 10) / 10, estimated: true }
+      })
+    all[acc.id] = {
+      fetchedAt: iso(feed.at),
+      ok: true,
+      error: null,
+      windows: [...feed.windows, ...kept],
+      plan: previous?.plan ?? acc.plan,
+    }
+    this.store.saveUsage(all)
+    this.liveAppliedAt = feed.at.getTime()
+    return true
+  }
+
+  private liveIsFresh(): boolean {
+    const feed = live.readLive(dataDir(), this.now())
+    return feed !== null && this.now().getTime() - feed.at.getTime() < LIVE_FRESH_MS
+  }
+
+  installFeed(): AppState {
+    live.installFeed()
+    this.store.appendEvent('info', 'Claude Code status line feed installed')
+    this.emit()
+    return this.getState()
+  }
+
+  uninstallFeed(): AppState {
+    live.uninstallFeed()
+    this.liveAppliedAt = 0
+    this.store.appendEvent('info', 'Claude Code status line feed removed')
+    this.emit()
+    return this.getState()
   }
 
   installHook(): AppState {

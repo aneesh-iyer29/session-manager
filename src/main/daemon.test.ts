@@ -211,6 +211,52 @@ describe('polling', () => {
   })
 })
 
+describe('live status line feed', () => {
+  it('merges the feed into the active account and keeps the model window from the endpoint', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    writeFileSync(
+      join(home, 'statusline.json'),
+      JSON.stringify({ rate_limits: { five_hour: { used_percentage: 61.5, resets_at: 1893456000 }, seven_day: { used_percentage: 12, resets_at: 1893542400 } } }),
+    )
+    const state = await h.daemon.refresh()
+    const active = state.accounts.find((a) => a.id === 'acc_1')!
+    const byKey = Object.fromEntries(active.usage!.windows.map((w) => [w.key, w]))
+    expect(byKey['five_hour']?.pct).toBe(61.5)
+    expect(byKey['five_hour']?.resetsAt).toBe('2030-01-01T00:00:00.000Z')
+    expect(byKey['seven_day']?.pct).toBe(12)
+    expect(byKey['model:fable']?.pct).toBe(30) // still from the endpoint
+    expect(active.usage!.ok).toBe(true)
+    expect(state.liveFeed.lastAt).not.toBeNull()
+    // The standby account is untouched by the feed.
+    const standby = state.accounts.find((a) => a.id === 'acc_2')!
+    expect(standby.usage!.windows.find((w) => w.key === 'five_hour')?.pct).toBe(10)
+  })
+
+  it('projects the Fable window from the live weekly window between endpoint polls', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    const feed = (weekly: number) =>
+      writeFileSync(join(home, 'statusline.json'), JSON.stringify({ rate_limits: { five_hour: { used_percentage: 50, resets_at: 1893456000 }, seven_day: { used_percentage: weekly, resets_at: 1893542400 } } }))
+    feed(20)
+    await h.daemon.refresh() // endpoint: fable 30, weekly 20 → anchor
+    h.clock.now = new Date('2026-06-01T12:03:00Z')
+    feed(25)
+    const state = await h.daemon.refresh(false) // feed fresh → no endpoint call for the active account
+    const fable = state.accounts.find((a) => a.id === 'acc_1')!.usage!.windows.find((w) => w.key === 'model:fable')!
+    expect(fable.pct).toBe(40) // 30 + 2 × (25 − 20)
+    expect(fable.estimated).toBe(true)
+  })
+
+  it('ignores a feed without rate limits', async () => {
+    const h = harness()
+    writeFileSync(join(process.env.SESSION_MANAGER_HOME as string, 'statusline.json'), JSON.stringify({ model: { id: 'x' } }))
+    const state = await h.daemon.refresh()
+    expect(state.liveFeed.lastAt).toBeNull()
+    expect(state.accounts.find((a) => a.id === 'acc_1')!.usage!.windows.find((w) => w.key === 'five_hour')?.pct).toBe(10)
+  })
+})
+
 describe('autoswap', () => {
   it('does not switch when disabled, even over threshold', async () => {
     const h = harness({ autoswap: false })

@@ -56,7 +56,7 @@ export function MeterRow({ window: w, now, threshold }: RowProps) {
     <div className="meter-row">
       <span className="meter-row__label">{w.label}</span>
       <Meter pct={w.pct} bucket={bucket} label={`${w.label} used`} />
-      <span className="meter-row__pct">{formatPercent(w.pct)}</span>
+      <span className="meter-row__pct">{w.estimated ? '≈' : ''}{formatPercent(w.pct)}</span>
       <span className="meter-row__reset">
         {formatCountdown(w.resetsAt, now)}
       </span>

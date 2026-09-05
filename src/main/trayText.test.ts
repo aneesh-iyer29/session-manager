@@ -48,6 +48,7 @@ function state(extra: Partial<AppState> = {}): AppState {
     accounts: [account()],
     codex: codexNone,
     nudge: { hookInstalled: false, pending: null },
+    liveFeed: { installed: false, lastAt: null },
     events: [],
     ...extra,
   }
@@ -118,7 +119,7 @@ describe('rows', () => {
     const rows = menuRows(state(), now)
     expect(rows.map((r) => r.kind)).toEqual(['header', 'window', 'window', 'window', 'header', 'status'])
     expect(rows[0]).toEqual({ kind: 'header', title: 'work', right: 'Max · Active' })
-    expect(rows[1]).toEqual({ kind: 'window', label: '5-hour limit', right: 'Resets in 2 hr 13 min', pct: 21, tone: 'ok' })
+    expect(rows[1]).toMatchObject({ kind: 'window', label: '5-hour limit', right: 'Resets in 2 hr 13 min', pct: 21, tone: 'ok' })
     expect(rows[2]).toMatchObject({ label: 'Weekly · all models', right: '', pct: 51 })
     expect(rows[3]).toMatchObject({ label: 'Weekly · Fable', pct: 63, tone: 'ok' })
     expect(rows[4]).toEqual({ kind: 'header', title: 'Codex', right: 'Not configured' })
