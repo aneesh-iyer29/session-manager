@@ -88,6 +88,8 @@ export function registerIpc(daemon: Daemon): void {
   handle(IPC.openDataFolder, () => shell.openPath(dataDir()).then(() => undefined))
   handle(IPC.installHook, () => daemon.installHook())
   handle(IPC.uninstallHook, () => daemon.uninstallHook())
+  handle(IPC.installFeed, () => daemon.installFeed())
+  handle(IPC.uninstallFeed, () => daemon.uninstallFeed())
 }
 
 /** Push a state snapshot to every live window; the renderer never polls. */

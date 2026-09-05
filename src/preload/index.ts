@@ -24,6 +24,8 @@ const api: SwapperApi = {
   openDataFolder: () => ipcRenderer.invoke(IPC.openDataFolder),
   installHook: () => ipcRenderer.invoke(IPC.installHook),
   uninstallHook: () => ipcRenderer.invoke(IPC.uninstallHook),
+  installFeed: () => ipcRenderer.invoke(IPC.installFeed),
+  uninstallFeed: () => ipcRenderer.invoke(IPC.uninstallFeed),
   onState: (callback: (state: AppState) => void) => {
     const listener = (_event: IpcRendererEvent, state: AppState): void => callback(state)
     ipcRenderer.on(IPC.stateChanged, listener)

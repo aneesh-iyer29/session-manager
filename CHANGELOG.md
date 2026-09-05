@@ -3,6 +3,17 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.4.0] - 2026-09-04
+
+### Added
+
+- Live usage feed: an installable Claude Code status line script hands the app the 5-hour
+  and weekly usage Claude Code already has from every response, so the active account
+  updates instantly and the usage endpoint is only polled for the per-model window (every
+  30 min while the feed is fresh). Existing status lines are chained and restored on remove.
+- Between those polls the Fable window is projected from the live weekly window (two points
+  per weekly point, anchored at the last real reading) and marked ≈.
+
 ## [0.3.7] - 2026-09-04
 
 ### Changed

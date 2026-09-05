@@ -25,6 +25,8 @@ export interface Actions {
   openExternal: (url: string) => Promise<void>
   installHook: () => Promise<void>
   uninstallHook: () => Promise<void>
+  installFeed: () => Promise<void>
+  uninstallFeed: () => Promise<void>
 }
 
 export function useActions(): Actions {
@@ -84,6 +86,8 @@ export function useActions(): Actions {
       openExternal: (url) => run(`open`, () => api.openExternal(url)),
       installHook: () => run('hook', () => api.installHook(), 'Compact nudge hook installed in Claude Code'),
       uninstallHook: () => run('hook', () => api.uninstallHook(), 'Compact nudge hook removed'),
+      installFeed: () => run('feed', () => api.installFeed(), 'Status line feed installed in Claude Code'),
+      uninstallFeed: () => run('feed', () => api.uninstallFeed(), 'Status line feed removed'),
     }
   }, [busy, run])
 }

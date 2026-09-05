@@ -29,6 +29,7 @@ docs/          ARCHITECTURE.md (spec), DESIGN.md (UI brief), USAGE.md (user guid
 | Swap policy (pure, no I/O) | `src/main/autoswap.ts` |
 | Poll loop, autoswap run, login bookkeeping, notifications | `src/main/daemon.ts` |
 | Compact-nudge flag file and the Claude Code hook installer | `src/main/nudge.ts` |
+| Status line feed (live 5h/7d usage from Claude Code) and its installer | `src/main/liveUsage.ts` |
 | Window, tray, IPC registration, app lifecycle | `src/main/window.ts`, `tray.ts`, `ipc.ts`, `index.ts` |
 | Renderer state and components | `src/renderer/src/` |
 

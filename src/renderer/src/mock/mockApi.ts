@@ -19,6 +19,7 @@ export function createMockApi(): SwapperApi {
   let codex = seedCodex(started)
   let activeId: string | null = 'acc_1'
   let hookInstalled = false
+  let feedInstalled = false
   let lastPollAt: string | null = new Date(started.getTime() - 12_000).toISOString()
   let inFlight = false
   let lastSwitchAt: string | null = events.find((e) => e.kind === 'switch')?.at ?? null
@@ -47,6 +48,7 @@ export function createMockApi(): SwapperApi {
       lastDecision,
       lastSwitchAt,
       nudge: { hookInstalled, pending: pendingNudge() },
+      liveFeed: { installed: feedInstalled, lastAt: feedInstalled ? new Date(Date.now() - 42_000).toISOString() : null },
     })
 
   /** Mirror the daemon: flag when the active account's worst gating window is at or past warnPct. */
@@ -254,6 +256,20 @@ export function createMockApi(): SwapperApi {
       later(() => {
         hookInstalled = true
         log('info', 'Claude Code compact-nudge hook installed', null)
+        return push()
+      }),
+
+    installFeed: () =>
+      later(() => {
+        feedInstalled = true
+        log('info', 'Claude Code status line feed installed', null)
+        return push()
+      }),
+
+    uninstallFeed: () =>
+      later(() => {
+        feedInstalled = false
+        log('info', 'Claude Code status line feed removed', null)
         return push()
       }),
 

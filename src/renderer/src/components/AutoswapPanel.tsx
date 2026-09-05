@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
 import type { AppState, Decision, NudgeMode, Settings, Strategy } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatDuration } from '../lib/format'
+import { formatAgo, formatDuration } from '../lib/format'
 import { Button } from './Button'
 import { Toggle } from './Toggle'
 
@@ -31,7 +31,7 @@ const same = (a: Draft, b: Draft) => (Object.keys(a) as (keyof Draft)[]).every((
  * typed threshold never triggers a swap); the toggles save immediately because
  * each is a complete decision on its own.
  */
-export function AutoswapPanel({ state, actions }: Props) {
+export function AutoswapPanel({ state, now, actions }: Props) {
   const settings = state.settings
   const [draft, setDraft] = useState<Draft>(() => pick(settings))
   const saving = actions.busy.has('settings')
@@ -146,6 +146,7 @@ export function AutoswapPanel({ state, actions }: Props) {
         </div>
       </div>
 
+      <FeedCard state={state} actions={actions} now={now} />
       <HookCard state={state} actions={actions} />
 
       <div className="card panel">
@@ -174,6 +175,37 @@ export function AutoswapPanel({ state, actions }: Props) {
  * script under ~/.claude/hooks and registers it in ~/.claude/settings.json;
  * removing takes exactly that back out.
  */
+/**
+ * The status line feed: Claude Code writes its rate-limit numbers to the app on
+ * every assistant message, so the active account updates without spending the
+ * usage endpoint's budget. Install points `statusLine` at our script (any
+ * existing status line keeps running underneath it); Remove restores it.
+ */
+function FeedCard({ state, actions, now }: { state: AppState; actions: Actions; now: Date }) {
+  const installed = state.liveFeed.installed
+  const lastAt = state.liveFeed.lastAt
+  const busy = actions.busy.has('feed')
+  return (
+    <div className="card panel">
+      <div className="hook-row">
+        <div className="hook-row__text">
+          <span className="toggle-row__label">Claude Code status line feed</span>
+          <span className="toggle-row__hint">
+            {installed
+              ? lastAt
+                ? `Live from Claude Code · last update ${formatAgo(lastAt, now)}`
+                : 'Installed. Updates once Claude Code sends its first message.'
+              : 'Reads the active account’s 5-hour and weekly usage from Claude Code itself, no polling.'}
+          </span>
+        </div>
+        <Button size="sm" variant={installed ? 'default' : 'primary'} disabled={busy} onClick={() => (installed ? actions.uninstallFeed() : actions.installFeed())}>
+          {busy ? 'Working…' : installed ? 'Remove' : 'Install'}
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 function HookCard({ state, actions }: { state: AppState; actions: Actions }) {
   const installed = state.nudge.hookInstalled
   const pending = state.nudge.pending
