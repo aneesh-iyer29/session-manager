@@ -3,6 +3,13 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.5] - 2026-09-04
+
+### Changed
+
+- Removed the non-functional ⌘O/⌘Q hints from the glance menu so macOS no longer reserves a
+  shortcut column and the usage rows reach the right edge.
+
 ## [0.3.4] - 2026-09-04
 
 ### Changed
