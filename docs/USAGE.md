@@ -55,7 +55,8 @@ Arm it in the Auto-swap panel or from the menu bar. Each poll the policy runs:
 The last decision is shown in the panel and, when it changes, in Activity. A notification
 fires on each automatic switch (turn off with *Notifications*).
 
-Poll interval is 60 s by default (minimum 15). Accounts fetched within the last 60 s are
+Poll interval is 2 min by default (minimum 15 s). The active account is fetched every poll;
+standby accounts every 5 min unless within 10 points of the threshold. Accounts fetched within the last 60 s are
 skipped unless you press Refresh.
 
 ## Compact nudge
@@ -106,7 +107,7 @@ window hides it; quit from the menu or ⌘Q.
 | Threshold | 50–100, 90 | Near-limit percent. |
 | Margin | 0–50, 10 | Required headroom advantage of a target. |
 | Cooldown | ≥ 0, 300 s | Minimum gap between automatic switches. |
-| Poll interval | ≥ 15, 60 s | How often usage is refreshed. |
+| Poll interval | ≥ 15, 120 s | How often the loop runs; standby accounts are fetched at most every 5 min. |
 | Strategy | `best` | `best` or `consume_first`. |
 | Model | `Fable` | Display name of the per-model weekly window that gates swapping. |
 | Codex panel (Hide / Show) | on | Show the Codex panel. |

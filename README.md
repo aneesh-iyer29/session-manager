@@ -63,7 +63,7 @@ Whichever account matches the live Keychain credential is marked **active**.
 
 ## Auto-swap semantics
 
-Every poll (default 60 s) the app refreshes usage, then, if auto-swap is armed, runs the
+Every poll (default 2 min; standby accounts at most every 5 min) the app refreshes usage, then, if auto-swap is armed, runs the
 policy:
 
 | Setting | Meaning |

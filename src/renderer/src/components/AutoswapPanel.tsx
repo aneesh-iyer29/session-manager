@@ -1,7 +1,7 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
 import type { AppState, Decision, NudgeMode, Settings, Strategy } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatAgo, formatDuration } from '../lib/format'
+import { formatDuration } from '../lib/format'
 import { Button } from './Button'
 import { Toggle } from './Toggle'
 
@@ -31,7 +31,7 @@ const same = (a: Draft, b: Draft) => (Object.keys(a) as (keyof Draft)[]).every((
  * typed threshold never triggers a swap); the toggles save immediately because
  * each is a complete decision on its own.
  */
-export function AutoswapPanel({ state, now, actions }: Props) {
+export function AutoswapPanel({ state, actions }: Props) {
   const settings = state.settings
   const [draft, setDraft] = useState<Draft>(() => pick(settings))
   const saving = actions.busy.has('settings')
@@ -66,7 +66,7 @@ export function AutoswapPanel({ state, now, actions }: Props) {
           threshold {settings.threshold} · margin {settings.margin} · cooldown {formatDuration(settings.cooldownSeconds)} · every{' '}
           {formatDuration(settings.pollIntervalSeconds)}
         </div>
-        <DecisionLine decision={state.autoswap.lastDecision} state={state} now={now} />
+        <DecisionLine decision={state.autoswap.lastDecision} state={state} />
 
         <div className="toggle-list">
           <Toggle
@@ -199,12 +199,12 @@ function HookCard({ state, actions }: { state: AppState; actions: Actions }) {
   )
 }
 
-function DecisionLine({ decision, state, now }: { decision: Decision | null; state: AppState; now: Date }) {
+function DecisionLine({ decision, state }: { decision: Decision | null; state: AppState }) {
   if (!decision) return <div className="panel__decision">No decision yet.</div>
   const target = decision.targetId ? state.accounts.find((a) => a.id === decision.targetId) : null
   const label = decision.action === 'switch' && target ? `switch → ${target.alias || target.email}` : decision.action
   return (
-    <div className="panel__decision" title={`Decided ${formatAgo(decision.at, now)}`}>
+    <div className="panel__decision">
       <span className={`panel__decision-action panel__decision-action--${decision.action}`}>{label}</span>
       <span>— {decision.reason}</span>
     </div>

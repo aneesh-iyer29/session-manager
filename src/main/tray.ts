@@ -56,7 +56,7 @@ function textMenu(rows: MenuRow[], actions: TrayActions): Menu {
 }
 
 function imageMenu(rows: MenuRow[], images: NativeImage[], actions: TrayActions): Menu {
-  const items: MenuItemConstructorOptions[] = rows.map((row, i) => ({ label: '', icon: images[i], click: actions.open, toolTip: rowText(row) }))
+  const items: MenuItemConstructorOptions[] = rows.map((_row, i) => ({ label: '', icon: images[i], click: actions.open }))
   return Menu.buildFromTemplate([...items, ...actionsItems(actions)])
 }
 

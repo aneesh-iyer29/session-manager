@@ -3,6 +3,20 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.6] - 2026-09-04
+
+### Fixed
+
+- A failed usage poll no longer blanks the headroom number: the last known windows still
+  drive the gauge and the swap policy, with one line saying why and how old they are.
+- Failure wording: "Rate limited by Anthropic · retrying in 9 min" instead of "HTTP 429".
+- Removed hover tooltips from tray rows, reset times, poll age, and the decision line.
+
+### Changed
+
+- Default poll interval is 2 min; standby accounts are fetched at most every 5 min unless
+  within 10 points of the threshold, to stay inside the usage endpoint's rate limit.
+
 ## [0.3.5] - 2026-09-04
 
 ### Changed
