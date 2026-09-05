@@ -3,6 +3,19 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.2] - 2026-09-04
+
+### Fixed
+
+- Menu bar glyph was an opaque white square: the template PNGs are now rasterized by
+  Electron offscreen (`scripts/render-tray.mjs`) with real alpha instead of by `qlmanage`.
+
+### Changed
+
+- Glance menu rows are rendered as retina images with a real progress bar, in the style of
+  Claude's usage panel: label, "Resets in 3 hr 5 min" / "Resets Mon 10:00 AM", percent, bar.
+  Falls back to text rows if the offscreen renderer fails.
+
 ## [0.3.1] - 2026-09-04
 
 ### Changed

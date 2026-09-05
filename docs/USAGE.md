@@ -89,7 +89,8 @@ panel only reports that it is configured. *Hide* in the panel header turns it of
 ## Menu bar
 
 The menu bar item is the Arcophos mark alone, no text. Click it for a glance menu: each
-account with a usage bar per window (5-hour, Weekly, Fable weekly) and its reset countdown,
+account with a usage bar per window (5-hour limit, Weekly · all models, Weekly · Fable) and its
+reset time,
 the Codex account, and one status line (auto-swap state, last poll). The only actions are
 **Open Session Manager** and **Quit**; switching and settings live in the window so the menu
 can never change anything by accident. Clicking any row opens the window.

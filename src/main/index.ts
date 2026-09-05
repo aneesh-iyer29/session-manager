@@ -9,7 +9,7 @@ import { Daemon } from './daemon'
 import { broadcastState, registerIpc } from './ipc'
 import { dataDir, setDataDir } from './paths'
 import { Store } from './store'
-import { createTray, destroyTray, hasTray, updateTray } from './tray'
+import { createTray, destroyTray, hasTray, trayFrame, updateTray } from './tray'
 import { createWindow, markQuitting, showWindow } from './window'
 import type { AppState } from '../shared/types'
 
@@ -104,12 +104,15 @@ async function smokeReport(daemon: Daemon): Promise<void> {
       rendererChars = typeof text === 'string' ? text.length : -1
       const png = process.env.CLAUDE_SWAPPER_SMOKE_PNG
       if (png) writeFileSync(png, (await win.capturePage()).toPNG())
+      const trayPng = process.env.CLAUDE_SWAPPER_SMOKE_TRAY_PNG
+      const frame = trayFrame()
+      if (trayPng && frame) writeFileSync(trayPng, frame.toPNG())
     } catch (err) {
       console.error(`smoke: renderer probe failed: ${err instanceof Error ? err.message : String(err)}`)
     }
   }
   console.log(
-    `smoke: windows=${BrowserWindow.getAllWindows().length} tray=${hasTray() ? 1 : 0} rendererChars=${rendererChars} ` +
+    `smoke: windows=${BrowserWindow.getAllWindows().length} tray=${hasTray() ? 1 : 0} trayRows=${trayFrame() ? 'rendered' : 'text'} rendererChars=${rendererChars} ` +
       `accounts=${state.accounts.length} events=${state.events.length} lastPollAt=${state.polling.lastPollAt}`,
   )
 }
