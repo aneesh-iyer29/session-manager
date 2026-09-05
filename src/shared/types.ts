@@ -70,7 +70,7 @@ export interface Settings {
   margin: number
   /** >= 0. Minimum seconds between automatic switches. */
   cooldownSeconds: number
-  /** >= 15. The active account is fetched every poll; standby accounts at most every 5 minutes unless near the threshold. */
+  /** >= 15. The active account is fetched at most every 5 minutes; standby accounts every 10 unless near the threshold. The usage endpoint allows ~30 requests an hour per token. */
   pollIntervalSeconds: number
   strategy: Strategy
   /** Display name of the per-model weekly window that gates swapping. Default "Fable". */
@@ -164,7 +164,7 @@ export const DEFAULT_SETTINGS: Settings = {
   threshold: 90,
   margin: 10,
   cooldownSeconds: 300,
-  pollIntervalSeconds: 120,
+  pollIntervalSeconds: 300,
   strategy: 'best',
   model: 'Fable',
   codexEnabled: true,

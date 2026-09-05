@@ -3,6 +3,13 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.7] - 2026-09-04
+
+### Changed
+
+- Poll cadence tuned to the usage endpoint's measured budget (~30 requests/hour per token):
+  default interval 5 min, active account at most every 5 min, standby every 10 min.
+
 ## [0.3.6] - 2026-09-04
 
 ### Fixed

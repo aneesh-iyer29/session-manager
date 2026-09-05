@@ -28,9 +28,14 @@ import * as autoswap from './autoswap'
 import { readActiveCredential, writeActiveCredential } from './keychain'
 
 /** Usage fetched more recently than this is reused unless the poll is forced. */
-const MIN_FETCH_GAP_MS = 60_000
-/** Standby accounts change slowly; poll them every few minutes unless they are close to the line. */
-const STANDBY_FETCH_GAP_MS = 5 * 60_000
+/**
+ * The usage endpoint allows roughly 28-30 requests per trailing hour per token,
+ * with no refill until old requests age out, and Claude Code's own checks share
+ * that budget. Six to ten fetches an hour per account is the safe steady state.
+ */
+const MIN_FETCH_GAP_MS = 5 * 60_000
+/** Standby accounts change slowly; poll them every ten minutes unless they are close to the line. */
+const STANDBY_FETCH_GAP_MS = 10 * 60_000
 const NEAR_LINE_PTS = 10
 /** Fallback back-off after a 429 without a Retry-After. */
 const RATE_LIMIT_BACKOFF_MS = 10 * 60_000
