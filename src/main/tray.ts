@@ -43,8 +43,10 @@ function templateImage(): NativeImage {
 function actionsItems(actions: TrayActions): MenuItemConstructorOptions[] {
   return [
     { type: 'separator' },
-    { label: 'Open Session Manager', accelerator: 'CmdOrCtrl+O', click: actions.open },
-    { label: 'Quit Session Manager', accelerator: 'CmdOrCtrl+Q', click: actions.quit },
+    // No key equivalents: they cannot fire from a tray menu, and macOS would reserve a
+    // shortcut column on every row, leaving the image rows short of the right edge.
+    { label: 'Open Session Manager', click: actions.open },
+    { label: 'Quit Session Manager', click: actions.quit },
   ]
 }
 
