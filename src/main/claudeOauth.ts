@@ -28,7 +28,7 @@ export type FetchFn = typeof fetch
 const API_HEADERS = {
   'anthropic-beta': 'oauth-2025-04-20',
   'anthropic-version': '2023-06-01',
-  'User-Agent': 'claude-swapper/0.1',
+  'User-Agent': 'session-manager/0.1',
   Accept: 'application/json',
 }
 

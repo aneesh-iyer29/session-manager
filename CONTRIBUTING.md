@@ -6,8 +6,8 @@ that way.
 ## Setup
 
 ```sh
-git clone https://github.com/aneesh-iyer29/claude-swapper.git
-cd claude-swapper
+git clone https://github.com/aneesh-iyer29/session-manager.git
+cd session-manager
 npm install
 npm run dev          # Electron with hot reload
 npm run dev:web      # renderer only, in a browser, against the mock backend
@@ -20,7 +20,7 @@ the test suite run anywhere.
 
 ```sh
 npm run typecheck && npm run lint && npm test && npm run build
-CLAUDE_SWAPPER_HOME=$(mktemp -d) npm run smoke   # launches Electron headless, prints one status line
+SESSION_MANAGER_HOME=$(mktemp -d) npm run smoke   # launches Electron headless, prints one status line
 ```
 
 CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the smoke launch are local.
@@ -30,7 +30,7 @@ CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the s
 - **The contract is `src/shared`.** If a change needs new fields or channels, update
   `types.ts` / `ipc.ts`, the main process, the preload, the renderer, the mock, and
   `docs/ARCHITECTURE.md` in one PR.
-- **Tests are hermetic.** Point the store at a temp dir with `CLAUDE_SWAPPER_HOME`, point
+- **Tests are hermetic.** Point the store at a temp dir with `SESSION_MANAGER_HOME`, point
   Claude Code's config home at a temp dir with `CLAUDE_CONFIG_DIR`, inject `fetch`, `exec`,
   and the clock. A test that touches the real Keychain, the network, or your home directory
   will be rejected.

@@ -2,7 +2,7 @@
  * Every filesystem path the app touches, resolved in one place.
  *
  * Functions read the environment at *call* time so tests can redirect the whole
- * app into a temp directory with `CLAUDE_SWAPPER_HOME`, `CLAUDE_CONFIG_DIR`,
+ * app into a temp directory with `SESSION_MANAGER_HOME`, `CLAUDE_CONFIG_DIR`,
  * `CODEX_HOME` and `HOME`. This module never imports electron: the shell
  * injects the userData directory through `setDataDir` at startup so every other
  * main-process module (and every test) can import paths without an Electron
@@ -19,9 +19,9 @@ export function setDataDir(dir: string | null): void {
   injectedDataDir = dir
 }
 
-/** Our own state directory. `CLAUDE_SWAPPER_HOME` wins so tests never see real data. */
+/** Our own state directory. `SESSION_MANAGER_HOME` wins so tests never see real data. */
 export function dataDir(): string {
-  const env = process.env.CLAUDE_SWAPPER_HOME
+  const env = process.env.SESSION_MANAGER_HOME
   if (env) return env
   if (injectedDataDir) return injectedDataDir
   return join(homedir(), 'Library', 'Application Support', 'Session Manager')

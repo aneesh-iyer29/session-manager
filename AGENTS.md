@@ -28,14 +28,14 @@ user, local only, no telemetry.
 | Lint | `npm run lint` |
 | Tests | `npm test` |
 | Bundle | `npm run build` |
-| Headless launch check | `CLAUDE_SWAPPER_HOME=/tmp/x npm run smoke` |
+| Headless launch check | `SESSION_MANAGER_HOME=/tmp/x npm run smoke` |
 | Package (unsigned DMG + zip, arm64 + x64) | `npm run dist` (`npm run dist:dir` for the bare .app) |
 
 CI runs typecheck, lint, test, and build on Ubuntu; packaging and the smoke launch are local.
 
 ## Rules
 
-1. Tests are hermetic. Use temp directories through `CLAUDE_SWAPPER_HOME` and
+1. Tests are hermetic. Use temp directories through `SESSION_MANAGER_HOME` and
    `CLAUDE_CONFIG_DIR`, inject `fetch`/`exec`/clock. Never touch the real Keychain,
    network, `~/.claude*`, or `~/.codex`.
 2. No secrets in logs, thrown errors, events, or IPC payloads. Email addresses at most.

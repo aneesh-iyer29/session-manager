@@ -43,10 +43,10 @@ const savedEnv: Record<string, string | undefined> = {}
 
 beforeEach(() => {
   home = mkdtempSync(join(tmpdir(), 'swapper-switcher-'))
-  for (const k of ['HOME', 'CLAUDE_CONFIG_DIR', 'CLAUDE_SWAPPER_HOME']) savedEnv[k] = process.env[k]
+  for (const k of ['HOME', 'CLAUDE_CONFIG_DIR', 'SESSION_MANAGER_HOME']) savedEnv[k] = process.env[k]
   process.env.HOME = home
   process.env.CLAUDE_CONFIG_DIR = join(home, '.claude')
-  process.env.CLAUDE_SWAPPER_HOME = join(home, 'swapper')
+  process.env.SESSION_MANAGER_HOME = join(home, 'swapper')
   store = new Store(join(home, 'swapper'))
   live = { value: null, writes: [], failWrites: false }
   deps = {

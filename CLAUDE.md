@@ -19,7 +19,7 @@ docs/          ARCHITECTURE.md (spec), DESIGN.md (UI brief), USAGE.md (user guid
 
 | Concern | Module |
 | --- | --- |
-| Paths, `CLAUDE_CONFIG_DIR`, `CLAUDE_SWAPPER_HOME` | `src/main/paths.ts` |
+| Paths, `CLAUDE_CONFIG_DIR`, `SESSION_MANAGER_HOME` | `src/main/paths.ts` |
 | Keychain read/write via `/usr/bin/security` | `src/main/keychain.ts` |
 | Claude Code's lock files (proper-lockfile dirs) | `src/main/claudeLocks.ts` |
 | Settings / accounts / credentials / usage / events on disk | `src/main/store.ts` |
@@ -50,12 +50,12 @@ npm run dist       build + unsigned DMG/zip → dist/ (dist:dir for just the .ap
 - `src/shared` is the contract. Changing it means updating main, preload, renderer, the
   mock, and `docs/ARCHITECTURE.md` in the same change.
 - Main-process modules take their I/O as arguments (store, fetch, exec, clock). Tests use
-  temp dirs via `CLAUDE_SWAPPER_HOME` / `CLAUDE_CONFIG_DIR` and injected fetch/exec.
+  temp dirs via `SESSION_MANAGER_HOME` / `CLAUDE_CONFIG_DIR` and injected fetch/exec.
 - `switcher.addFromActive` / `addFromCredential` / `activeAccount` are async (they read the
   Keychain and may call the profile API). `claudeGlobalConfig()` follows `CLAUDE_CONFIG_DIR`;
   `codexAuthPath()` follows `CODEX_HOME`.
-- Smoke-test the real app against a scratch data dir: `CLAUDE_SWAPPER_HOME=/tmp/x npm run smoke`
-  (`CLAUDE_SWAPPER_SMOKE_PNG=/tmp/x.png` also saves a screenshot). It reads the Keychain
+- Smoke-test the real app against a scratch data dir: `SESSION_MANAGER_HOME=/tmp/x npm run smoke`
+  (`SESSION_MANAGER_SMOKE_PNG=/tmp/x.png` also saves a screenshot). It reads the Keychain
   and `~/.codex/auth.json` like a normal launch but writes nothing when there are no accounts.
 - Never log, throw, or emit a secret. Events and errors carry email addresses at most.
 - Atomic writes (temp + rename). Credential files 0600, credentials dir 0700.
