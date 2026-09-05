@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import type { Account, Settings } from '@shared/types'
+import type { Account, NudgeFlag, Settings } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
 import { formatPlan, secondaryWindows } from '../lib/format'
 import { spring } from '../lib/motion'
@@ -13,13 +13,14 @@ interface Props {
   settings: Settings
   now: Date
   actions: Actions
+  nudge?: NudgeFlag | null
 }
 
 /**
  * The active account. `layoutId` matches the standby card for the same id so
  * a swap animates the card into this slot instead of cutting.
  */
-export function HeroCard({ account, settings, now, actions }: Props) {
+export function HeroCard({ account, settings, now, actions, nudge = null }: Props) {
   const secondary = secondaryWindows(account.usage, account.bindingWindow)
   const disabling = actions.busy.has(`disable:${account.id}`)
   const usage = account.usage
@@ -56,6 +57,15 @@ export function HeroCard({ account, settings, now, actions }: Props) {
       ) : null}
 
       {usage && !usage.ok && usage.error ? <p className="card__note card__note--danger">{usage.error}</p> : null}
+
+      {nudge && nudge.accountId === account.id ? (
+        <div className="notice" role="status">
+          <span className="notice__label">Swap soon</span>
+          <span className="notice__body">
+            {nudge.window} is at {nudge.pct}%. Run <code>/compact</code> in Claude Code before the swap so the conversation isn't re-cached on the next account.
+          </span>
+        </div>
+      ) : null}
 
       <div className="card__actions">
         <Button size="sm" disabled={disabling} onClick={() => actions.setDisabled(account, !account.disabled)}>

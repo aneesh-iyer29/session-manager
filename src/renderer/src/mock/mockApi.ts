@@ -18,6 +18,7 @@ export function createMockApi(): SwapperApi {
   let events = seedEvents(started)
   let codex = seedCodex(started)
   let activeId: string | null = 'acc_1'
+  let hookInstalled = false
   let lastPollAt: string | null = new Date(started.getTime() - 12_000).toISOString()
   let inFlight = false
   let lastSwitchAt: string | null = events.find((e) => e.kind === 'switch')?.at ?? null
@@ -45,7 +46,29 @@ export function createMockApi(): SwapperApi {
       inFlight,
       lastDecision,
       lastSwitchAt,
+      nudge: { hookInstalled, pending: pendingNudge() },
     })
+
+  /** Mirror the daemon: flag when the active account's worst gating window is at or past warnPct. */
+  function pendingNudge(): AppState['nudge']['pending'] {
+    if (!settings.autoswapEnabled || settings.dryRun) return null
+    const a = accounts.find((x) => x.id === activeId)
+    if (!a?.usage) return null
+    const gating = a.usage.windows.filter((w) => w.key === 'five_hour' || w.key === 'seven_day' || w.key === `model:${settings.model.toLowerCase()}`)
+    const worst = gating.reduce<(typeof gating)[number] | null>((m, w) => (m == null || w.pct > m.pct ? w : m), null)
+    if (!worst || worst.pct < settings.warnPct) return null
+    const label = a.alias || a.email
+    const pct = Math.round(worst.pct)
+    return {
+      id: `${a.id}:${worst.key}:${worst.resetsAt ?? 'unknown'}`,
+      at: new Date().toISOString(),
+      accountId: a.id,
+      label,
+      window: worst.label,
+      pct,
+      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${settings.threshold}%.`,
+    }
+  }
 
   const push = (): AppState => {
     const s = snapshot()
@@ -226,6 +249,20 @@ export function createMockApi(): SwapperApi {
     },
 
     openDataFolder: () => Promise.resolve(),
+
+    installHook: () =>
+      later(() => {
+        hookInstalled = true
+        log('info', 'Claude Code compact-nudge hook installed', null)
+        return push()
+      }),
+
+    uninstallHook: () =>
+      later(() => {
+        hookInstalled = false
+        log('info', 'Claude Code compact-nudge hook removed', null)
+        return push()
+      }),
 
     onState: (cb) => {
       listeners.add(cb)

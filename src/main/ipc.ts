@@ -23,6 +23,8 @@ const SETTING_KEYS: ReadonlySet<string> = new Set([
   'notify',
   'launchAtLogin',
   'showInDock',
+  'warnPct',
+  'nudgeMode',
 ])
 
 function str(value: unknown, name: string): string {
@@ -84,6 +86,8 @@ export function registerIpc(daemon: Daemon): void {
   handle(IPC.updateSettings, (patch) => daemon.updateSettings(settingsPatch(patch)))
   handle(IPC.openExternal, (url) => shell.openExternal(httpUrl(url)))
   handle(IPC.openDataFolder, () => shell.openPath(dataDir()).then(() => undefined))
+  handle(IPC.installHook, () => daemon.installHook())
+  handle(IPC.uninstallHook, () => daemon.uninstallHook())
 }
 
 /** Push a state snapshot to every live window; the renderer never polls. */

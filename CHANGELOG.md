@@ -3,6 +3,17 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.0] - 2026-09-04
+
+### Added
+
+- Compact nudge: when the active account's worst gating window reaches "Warn at" (default 80%)
+  with auto-swap armed, the daemon raises a swap-pending flag. An optional Claude Code
+  `UserPromptSubmit` hook (installed from the Auto-swap panel) reads it and either stops the
+  first prompt with "run /compact now" or only tells Claude, so the conversation is compacted
+  before it is re-cached on the next account. New settings `warnPct` and `nudgeMode`; new
+  `nudge` state; `installHook` / `uninstallHook` IPC.
+
 ## [0.2.0] - 2026-09-04
 
 ### Changed

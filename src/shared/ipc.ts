@@ -20,6 +20,8 @@ export const IPC = {
   updateSettings: 'swapper:updateSettings',
   openExternal: 'swapper:openExternal',
   openDataFolder: 'swapper:openDataFolder',
+  installHook: 'swapper:installHook',
+  uninstallHook: 'swapper:uninstallHook',
   /** main → renderer push, payload: AppState */
   stateChanged: 'swapper:stateChanged',
 } as const
@@ -42,6 +44,9 @@ export interface SwapperApi {
   updateSettings(patch: Partial<Settings>): Promise<AppState>
   openExternal(url: string): Promise<void>
   openDataFolder(): Promise<void>
+  /** Write the compact-nudge hook script and register it in ~/.claude/settings.json. */
+  installHook(): Promise<AppState>
+  uninstallHook(): Promise<AppState>
   /** Subscribe to state pushes. Returns an unsubscribe function. */
   onState(callback: (state: AppState) => void): () => void
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState, type ChangeEvent } from 'react'
-import type { AppState, Decision, Settings, Strategy } from '@shared/types'
+import type { AppState, Decision, NudgeMode, Settings, Strategy } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
 import { formatAgo, formatDuration } from '../lib/format'
 import { Button } from './Button'
@@ -11,7 +11,7 @@ interface Props {
   actions: Actions
 }
 
-type Draft = Pick<Settings, 'strategy' | 'threshold' | 'margin' | 'cooldownSeconds' | 'pollIntervalSeconds' | 'model'>
+type Draft = Pick<Settings, 'strategy' | 'threshold' | 'margin' | 'cooldownSeconds' | 'pollIntervalSeconds' | 'model' | 'warnPct' | 'nudgeMode'>
 
 const pick = (s: Settings): Draft => ({
   strategy: s.strategy,
@@ -20,6 +20,8 @@ const pick = (s: Settings): Draft => ({
   cooldownSeconds: s.cooldownSeconds,
   pollIntervalSeconds: s.pollIntervalSeconds,
   model: s.model,
+  warnPct: s.warnPct,
+  nudgeMode: s.nudgeMode,
 })
 
 const same = (a: Draft, b: Draft) => (Object.keys(a) as (keyof Draft)[]).every((k) => a[k] === b[k])
@@ -119,6 +121,17 @@ export function AutoswapPanel({ state, now, actions }: Props) {
             <span className="field__label">Gating model window</span>
             <input className="field__input" type="text" value={draft.model} maxLength={40} onChange={(e) => set('model', e.target.value)} />
           </label>
+          <label className="field">
+            <span className="field__label">Warn at (%)</span>
+            <input className="field__input" type="number" min={50} max={100} step={1} value={draft.warnPct} onChange={num('warnPct', settings.warnPct)} />
+          </label>
+          <label className="field">
+            <span className="field__label">Nudge</span>
+            <select className="field__input" value={draft.nudgeMode} onChange={(e) => set('nudgeMode', e.target.value as NudgeMode)}>
+              <option value="block">Block once</option>
+              <option value="context">Context only</option>
+            </select>
+          </label>
         </div>
         <div className="panel__actions">
           <span className="spacer" />
@@ -132,6 +145,8 @@ export function AutoswapPanel({ state, now, actions }: Props) {
           </Button>
         </div>
       </div>
+
+      <HookCard state={state} actions={actions} />
 
       <div className="card panel">
         <div className="toggle-list">
@@ -151,6 +166,36 @@ export function AutoswapPanel({ state, now, actions }: Props) {
         </div>
       </div>
     </section>
+  )
+}
+
+/**
+ * The Claude Code side of the compact nudge. Installing writes one hook
+ * script under ~/.claude/hooks and registers it in ~/.claude/settings.json;
+ * removing takes exactly that back out.
+ */
+function HookCard({ state, actions }: { state: AppState; actions: Actions }) {
+  const installed = state.nudge.hookInstalled
+  const pending = state.nudge.pending
+  const busy = actions.busy.has('hook')
+  return (
+    <div className="card panel">
+      <div className="hook-row">
+        <div className="hook-row__text">
+          <span className="toggle-row__label">Claude Code compact nudge</span>
+          <span className="toggle-row__hint">
+            {installed
+              ? pending
+                ? `Active: ${pending.label} at ${pending.pct}% of ${pending.window}`
+                : `Hook installed. Fires when the active account reaches ${state.settings.warnPct}%.`
+              : 'Adds a hook so Claude Code asks you to /compact before an auto-swap.'}
+          </span>
+        </div>
+        <Button size="sm" variant={installed ? 'default' : 'primary'} disabled={busy} onClick={() => (installed ? actions.uninstallHook() : actions.installHook())}>
+          {busy ? 'Working…' : installed ? 'Remove' : 'Install'}
+        </Button>
+      </div>
+    </div>
   )
 }
 

@@ -4,7 +4,7 @@
  * Keychain is a variable behind readActive/writeActive, and every HTTP call goes
  * to a scripted fetch. The real store, switcher, autoswap and claudeOauth run.
  */
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -235,6 +235,40 @@ describe('autoswap', () => {
     const cfg = JSON.parse(readFileSync(join(process.env.CLAUDE_CONFIG_DIR as string, '.claude.json'), 'utf8'))
     expect(cfg.oauthAccount.emailAddress).toBe('personal@example.com')
     expect(cfg.other).toBe(1)
+  })
+
+  it('raises the compact-nudge flag past the warn line and clears it after the swap', async () => {
+    const h = harness({ autoswap: true })
+    h.store.saveSettings({ ...h.store.loadSettings(), warnPct: 80, threshold: 90 })
+    h.fable.set('tok-1', 84)
+    let state = await h.daemon.refresh()
+    expect(state.activeId).toBe('acc_1')
+    expect(state.nudge.pending?.accountId).toBe('acc_1')
+    expect(state.nudge.pending?.pct).toBe(84)
+    expect(state.nudge.pending?.message).toContain('will be swapped at 90%')
+    const flagText = readFileSync(join(process.env.CLAUDE_SWAPPER_HOME as string, 'swap-pending.txt'), 'utf8')
+    expect(flagText.split('\n')[1]).toBe('block')
+    expect(state.events.filter((e) => e.message.startsWith('Compact nudge raised')).length).toBe(1)
+    // Same episode on the next poll: no duplicate event.
+    h.clock.now = new Date('2026-06-01T12:05:00Z')
+    state = await h.daemon.refresh()
+    expect(state.events.filter((e) => e.message.startsWith('Compact nudge raised')).length).toBe(1)
+    // Over threshold: the swap fires and the flag clears with the new active account below the line.
+    h.fable.set('tok-1', 95)
+    h.clock.now = new Date('2026-06-01T12:10:00Z')
+    state = await h.daemon.refresh()
+    expect(state.activeId).toBe('acc_2')
+    expect(state.nudge.pending).toBeNull()
+    expect(existsSync(join(process.env.CLAUDE_SWAPPER_HOME as string, 'swap-pending.txt'))).toBe(false)
+  })
+
+  it('never raises the flag in dry run or with auto-swap off', async () => {
+    const h = harness({ autoswap: true })
+    h.store.saveSettings({ ...h.store.loadSettings(), dryRun: true })
+    h.fable.set('tok-1', 85)
+    expect((await h.daemon.refresh()).nudge.pending).toBeNull()
+    h.store.saveSettings({ ...h.store.loadSettings(), dryRun: false, autoswapEnabled: false })
+    expect((await h.daemon.refresh()).nudge.pending).toBeNull()
   })
 
   it('honours the cooldown after a switch', async () => {

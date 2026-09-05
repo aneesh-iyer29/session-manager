@@ -79,6 +79,32 @@ export interface Settings {
   notify: boolean
   launchAtLogin: boolean
   showInDock: boolean
+  /** 50-100. Below `threshold`. The compact nudge flag is raised when the active account's gating window reaches this. */
+  warnPct: number
+  /** `block`: the Claude Code hook stops the first prompt after the flag with a message; `context`: it only tells Claude. */
+  nudgeMode: NudgeMode
+}
+
+export type NudgeMode = 'block' | 'context'
+
+/** Raised while the active account is near its swap line; consumed by the Claude Code hook. */
+export interface NudgeFlag {
+  /** Stable for one episode (account + window + reset), so the hook blocks at most once per episode. */
+  id: string
+  at: string
+  accountId: string
+  /** Alias or email of the account. */
+  label: string
+  /** Window label, e.g. "Fable weekly". */
+  window: string
+  pct: number
+  message: string
+}
+
+export interface NudgeState {
+  /** Whether the UserPromptSubmit hook is present in ~/.claude/settings.json. */
+  hookInstalled: boolean
+  pending: NudgeFlag | null
 }
 
 export type DecisionAction = 'stay' | 'switch' | 'blocked'
@@ -116,6 +142,7 @@ export interface AppState {
   settings: Settings
   accounts: Account[]
   codex: CodexState
+  nudge: NudgeState
   /** Newest first, at most 100. */
   events: SwapperEvent[]
 }
@@ -144,4 +171,6 @@ export const DEFAULT_SETTINGS: Settings = {
   notify: true,
   launchAtLogin: false,
   showInDock: true,
+  warnPct: 80,
+  nudgeMode: 'block',
 }

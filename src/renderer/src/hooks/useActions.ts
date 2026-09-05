@@ -23,6 +23,8 @@ export interface Actions {
   removeAccount: (account: Account) => Promise<void>
   updateSettings: (patch: Partial<Settings>, successMessage?: string) => Promise<void>
   openExternal: (url: string) => Promise<void>
+  installHook: () => Promise<void>
+  uninstallHook: () => Promise<void>
 }
 
 export function useActions(): Actions {
@@ -80,6 +82,8 @@ export function useActions(): Actions {
       removeAccount: (a) => run(`remove:${a.id}`, () => api.removeAccount(a.id), `Removed ${displayName(a)}`),
       updateSettings: (patch, message) => run('settings', () => api.updateSettings(patch), message ?? 'Settings saved'),
       openExternal: (url) => run(`open`, () => api.openExternal(url)),
+      installHook: () => run('hook', () => api.installHook(), 'Compact nudge hook installed in Claude Code'),
+      uninstallHook: () => run('hook', () => api.uninstallHook(), 'Compact nudge hook removed'),
     }
   }, [busy, run])
 }

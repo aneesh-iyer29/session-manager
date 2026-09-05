@@ -120,6 +120,8 @@ export function normalizeSettings(input: unknown): Settings {
     notify: bool(s.notify, d.notify),
     launchAtLogin: bool(s.launchAtLogin, d.launchAtLogin),
     showInDock: bool(s.showInDock, d.showInDock),
+    warnPct: clampNumber(s.warnPct, d.warnPct, 50, 100),
+    nudgeMode: s.nudgeMode === 'context' ? 'context' : d.nudgeMode,
   }
 }
 
