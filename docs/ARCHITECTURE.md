@@ -206,9 +206,11 @@ prompt with a message or hand Claude context. So:
   `trafficLightPosition: {x: 18, y: 18}`, `vibrancy: 'under-window'`, `visualEffectState:
   'active'`. Closing hides the window; the app keeps running in the tray. Quit from the tray
   menu or ⌘Q.
-* Tray title: `"<alias or email local-part> 63%"` where 63 is the active account's binding
-  window pct; a 16×16 template icon. Menu: Open Session Manager, Refresh now, Accounts ▸
-  (each account with headroom, click to switch), Auto-swap on/off, Launch at login, Quit.
+* Tray: the Arcophos mark as a template image, no title. Click (or right-click) pops a
+  glance menu built at click time from the latest state (`src/main/trayText.ts` renders the
+  rows: `▮▮▮▮▮▮▯▯▯▯ 63%  ·  2d 3h` per window, per account, then Codex, then a status line).
+  Rows open the window; the only other items are Open Session Manager and Quit. No state
+  changes from the tray.
 * `showInDock=false` calls `app.dock.hide()` so the app is menu-bar only.
 * `launchAtLogin` uses `app.setLoginItemSettings`.
 

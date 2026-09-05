@@ -1,23 +1,25 @@
 /**
- * Menu bar item: "<alias> 63%" next to a template glyph, plus a menu that covers
- * the everyday actions so the window rarely needs to be opened.
+ * Menu bar item: the Arcophos mark alone, no title. Clicking it opens a glance
+ * menu — usage bars for every account and Codex, one status line — and two
+ * actions: open the app, quit. Everything else (switching, toggles) lives in
+ * the window on purpose, so the menu can never change state by accident.
  */
 import { Menu, Tray, app, nativeImage } from 'electron'
+import type { MenuItemConstructorOptions } from 'electron'
 import { readFileSync } from 'node:fs'
-import type { Account, AppState } from '../shared/types'
+import type { AppState } from '../shared/types'
 import trayIcon1x from '../../build/trayTemplate.png?asset'
 import trayIcon2x from '../../build/trayTemplate@2x.png?asset'
+import { accountHeader, codexHeader, orderedWindows, statusLine, windowLine } from './trayText'
 
 export interface TrayActions {
   open: () => void
-  refresh: () => void
-  switchTo: (accountId: string) => void
-  setAutoswap: (enabled: boolean) => void
-  setLaunchAtLogin: (enabled: boolean) => void
   quit: () => void
 }
 
 let tray: Tray | null = null
+let latest: AppState | null = null
+let currentActions: TrayActions | null = null
 
 /**
  * Both scale factors are added explicitly: electron-vite hashes asset file
@@ -31,67 +33,59 @@ function templateImage(): Electron.NativeImage {
   return img
 }
 
-function shortName(acc: Account): string {
-  return acc.alias || acc.email.split('@')[0] || acc.id
+/** Information rows are enabled (so they render in full contrast) and open the app when clicked. */
+function info(label: string, open: () => void): MenuItemConstructorOptions {
+  return { label, click: open }
 }
 
-function trayTitle(state: AppState): string {
-  const active = state.accounts.find((a) => a.active)
-  if (!active) return ''
-  const binding = active.usage?.windows.find((w) => w.key === active.bindingWindow)
-  const pct = binding ? `${Math.round(binding.pct)}%` : active.headroom === null ? '–' : `${Math.round(100 - active.headroom)}%`
-  return `${shortName(active)} ${pct}`
+function buildMenu(state: AppState, actions: TrayActions, now: Date): Menu {
+  const items: MenuItemConstructorOptions[] = []
+  if (state.accounts.length === 0) {
+    items.push(info('No accounts yet — open Session Manager to add one', actions.open))
+  }
+  for (const acc of state.accounts) {
+    items.push(info(accountHeader(acc), actions.open))
+    const windows = orderedWindows(acc)
+    if (windows.length === 0) {
+      items.push(info(`    ${acc.usage?.error ?? 'usage not fetched yet'}`, actions.open))
+    }
+    for (const w of windows) items.push(info(`    ${windowLine(w, now)}`, actions.open))
+    items.push({ type: 'separator' })
+  }
+  if (state.settings.codexEnabled) {
+    items.push(info(codexHeader(state.codex), actions.open))
+    if (state.codex.usage) {
+      for (const w of orderedWindows({ usage: state.codex.usage })) items.push(info(`    ${windowLine(w, now)}`, actions.open))
+    }
+    items.push({ type: 'separator' })
+  }
+  items.push(info(statusLine(state, now), actions.open))
+  items.push({ type: 'separator' })
+  items.push({ label: 'Open Session Manager', accelerator: 'CmdOrCtrl+O', click: actions.open })
+  items.push({ label: `Quit Session Manager ${app.getVersion()}`, accelerator: 'CmdOrCtrl+Q', click: actions.quit })
+  return Menu.buildFromTemplate(items)
 }
 
-function accountLabel(acc: Account): string {
-  const room = acc.headroom === null ? 'usage unknown' : `${Math.round(acc.headroom)}% headroom`
-  const flags = [acc.active ? 'active' : '', acc.disabled ? 'held' : '', acc.tokenStatus === 'dead' ? 'needs login' : '']
-    .filter(Boolean)
-    .join(', ')
-  return `${shortName(acc)} — ${room}${flags ? ` (${flags})` : ''}`
+/** Build the menu at click time so countdowns and "polled Ns ago" are current. */
+function popup(): void {
+  if (!tray || !latest || !currentActions) return
+  tray.popUpContextMenu(buildMenu(latest, currentActions, new Date()))
 }
 
 export function createTray(actions: TrayActions): Tray {
   if (tray) return tray
+  currentActions = actions
   tray = new Tray(templateImage())
   tray.setToolTip('Session Manager')
-  tray.on('click', actions.open)
+  tray.setTitle('')
+  tray.on('click', popup)
+  tray.on('right-click', popup)
   return tray
 }
 
 export function updateTray(state: AppState, actions: TrayActions): void {
-  if (!tray) return
-  tray.setTitle(trayTitle(state), { fontType: 'monospacedDigit' })
-  const accounts = state.accounts.map((acc) => ({
-    label: accountLabel(acc),
-    enabled: !acc.active && acc.tokenStatus !== 'dead',
-    click: () => actions.switchTo(acc.id),
-  }))
-  tray.setContextMenu(
-    Menu.buildFromTemplate([
-      { label: 'Open Session Manager', click: actions.open },
-      { label: 'Refresh now', click: actions.refresh },
-      {
-        label: 'Accounts',
-        submenu: accounts.length ? accounts : [{ label: 'No accounts yet', enabled: false }],
-      },
-      { type: 'separator' },
-      {
-        label: 'Auto-swap',
-        type: 'checkbox',
-        checked: state.settings.autoswapEnabled,
-        click: (item) => actions.setAutoswap(item.checked),
-      },
-      {
-        label: 'Launch at login',
-        type: 'checkbox',
-        checked: state.settings.launchAtLogin,
-        click: (item) => actions.setLaunchAtLogin(item.checked),
-      },
-      { type: 'separator' },
-      { label: `Quit Session Manager ${app.getVersion()}`, click: actions.quit },
-    ]),
-  )
+  latest = state
+  currentActions = actions
 }
 
 export function hasTray(): boolean {
@@ -101,4 +95,5 @@ export function hasTray(): boolean {
 export function destroyTray(): void {
   tray?.destroy()
   tray = null
+  latest = null
 }

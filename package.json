@@ -1,7 +1,7 @@
 {
   "name": "claude-swapper",
   "productName": "Session Manager",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Usage dashboard and auto-swapper for multiple Claude Code accounts, with a read-only Codex quota view",
   "main": "./out/main/index.js",
   "type": "module",

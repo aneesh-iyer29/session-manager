@@ -3,6 +3,14 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.1] - 2026-09-04
+
+### Changed
+
+- Menu bar item is now the Arcophos mark alone. Its menu is a read-only glance: usage bars
+  and reset countdowns per account and for Codex, a status line, then Open Session Manager
+  and Quit. Switching and toggles were removed from the menu.
+
 ## [0.3.0] - 2026-09-04
 
 ### Added

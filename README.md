@@ -94,9 +94,8 @@ details in [docs/USAGE.md](docs/USAGE.md#compact-nudge).
 
 ## Menu bar and launch at login
 
-The tray item shows the active account's short name and binding-window percent. Its menu
-has Open, Refresh now, Accounts (with headroom; click to switch), Auto-swap, Launch at
-login, and Quit. Closing the window hides it; quit from the menu or with ⌘Q. *Show in
+The tray item is the Arcophos mark. Click it for a glance menu with usage bars for every
+account and Codex, plus Open Session Manager and Quit; all management stays in the window. Closing the window hides it; quit from the menu or with ⌘Q. *Show in
 Dock* off makes it a pure menu-bar app.
 
 ## Data and security
