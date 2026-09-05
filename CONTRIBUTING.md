@@ -23,7 +23,7 @@ npm run typecheck && npm run lint && npm test && npm run build
 CLAUDE_SWAPPER_HOME=$(mktemp -d) npm run smoke   # launches Electron headless, prints one status line
 ```
 
-CI runs the same steps on `macos-latest`.
+CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the smoke launch are local.
 
 ## Ground rules
 

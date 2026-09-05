@@ -13,7 +13,7 @@ export type MenuRow =
   | { kind: 'status'; text: string }
 
 /** Points. Width matches a comfortable NSMenu; heights give each row its own line. */
-export const ROW_WIDTH = 300
+export const ROW_WIDTH = 340
 export const ROW_HEIGHT: Record<MenuRow['kind'], number> = { header: 24, window: 34, status: 22 }
 
 const FILLED = '▮'

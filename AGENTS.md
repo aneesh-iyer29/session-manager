@@ -31,7 +31,7 @@ user, local only, no telemetry.
 | Headless launch check | `CLAUDE_SWAPPER_HOME=/tmp/x npm run smoke` |
 | Package (unsigned DMG + zip, arm64 + x64) | `npm run dist` (`npm run dist:dir` for the bare .app) |
 
-CI runs typecheck, lint, test, build, and the smoke launch on macOS.
+CI runs typecheck, lint, test, and build on Ubuntu; packaging and the smoke launch are local.
 
 ## Rules
 

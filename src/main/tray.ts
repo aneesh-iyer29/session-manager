@@ -7,7 +7,7 @@
  * Rows are pictures (see trayRender.ts) so they can carry a real bar; if the
  * offscreen renderer fails, the same rows fall back to text.
  */
-import { Menu, Tray, app, nativeImage, nativeTheme } from 'electron'
+import { Menu, Tray, nativeImage, nativeTheme } from 'electron'
 import type { MenuItemConstructorOptions, NativeImage } from 'electron'
 import { readFileSync } from 'node:fs'
 import type { AppState } from '../shared/types'
@@ -44,7 +44,7 @@ function actionsItems(actions: TrayActions): MenuItemConstructorOptions[] {
   return [
     { type: 'separator' },
     { label: 'Open Session Manager', accelerator: 'CmdOrCtrl+O', click: actions.open },
-    { label: `Quit Session Manager ${app.getVersion()}`, accelerator: 'CmdOrCtrl+Q', click: actions.quit },
+    { label: 'Quit Session Manager', accelerator: 'CmdOrCtrl+Q', click: actions.quit },
   ]
 }
 
