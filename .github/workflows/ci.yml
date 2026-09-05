@@ -1,9 +1,19 @@
 name: CI
 
+# Runs on pull requests and on pushes to main that touch code or config. Docs-only
+# pushes and release tags are skipped so the inbox only hears about real failures.
 on:
   push:
     branches: [main]
+    tags-ignore: ['**']
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - 'LICENSE'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
   pull_request:
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -11,9 +21,11 @@ concurrency:
 
 jobs:
   check:
-    # macOS because the main process is exercised by tests that assume darwin paths and tools.
-    runs-on: macos-latest
-    timeout-minutes: 20
+    # Ubuntu: the tests are hermetic (temp dirs, injected exec/fetch, platform passed in),
+    # so nothing here needs a macOS runner. Packaging and the headless smoke launch stay
+    # local (`npm run dist`, `npm run smoke`), where the real Keychain and menu bar exist.
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -25,5 +37,3 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
-      # Launches the built app headless against a scratch data dir and expects the status line.
-      - run: CLAUDE_SWAPPER_HOME="$RUNNER_TEMP/swapper-home" npm run smoke | tee smoke.log && grep -q 'smoke: windows=1 tray=1' smoke.log
