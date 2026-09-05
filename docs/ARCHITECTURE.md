@@ -206,11 +206,14 @@ prompt with a message or hand Claude context. So:
   `trafficLightPosition: {x: 18, y: 18}`, `vibrancy: 'under-window'`, `visualEffectState:
   'active'`. Closing hides the window; the app keeps running in the tray. Quit from the tray
   menu or ⌘Q.
-* Tray: the brand mark as a template image, no title. Click (or right-click) pops a
-  glance menu built at click time from the latest state (`src/main/trayText.ts` renders the
-  rows: `▮▮▮▮▮▮▯▯▯▯ 63%  ·  2d 3h` per window, per account, then Codex, then a status line).
-  Rows open the window; the only other items are Open Session Manager and Quit. No state
-  changes from the tray.
+* Tray: the brand mark as a template image (`build/trayTemplate*.png`, regenerated with
+  `npx electron scripts/render-tray.mjs` from `build/tray.svg`), no title. Click pops a glance
+  menu whose rows are images: `trayText.ts` builds the row model and its HTML,
+  `trayRender.ts` paints all rows in one offscreen transparent window at 2× and crops them into
+  per-row `NativeImage`s (rebuilt on every state push, so the menu opens instantly). Each
+  window row is label · "Resets in 3 hr 5 min" · percent over a 4 px bar in the headroom
+  colour. If rendering fails the same rows fall back to text. Rows open the window; the only
+  other items are Open Session Manager and Quit. No state changes from the tray.
 * `showInDock=false` calls `app.dock.hide()` so the app is menu-bar only.
 * `launchAtLogin` uses `app.setLoginItemSettings`.
 
