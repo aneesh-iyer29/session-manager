@@ -162,6 +162,7 @@ export function buildState(parts: {
   inFlight: boolean
   lastDecision: AppState['autoswap']['lastDecision']
   lastSwitchAt: string | null
+  nudge: AppState['nudge']
 }): AppState {
   const { now, settings } = parts
   return {
@@ -177,6 +178,7 @@ export function buildState(parts: {
     settings,
     accounts: parts.accounts.map((a) => toAccount(a, parts.activeId, settings.model)),
     codex: settings.codexEnabled ? parts.codex : { ...parts.codex, usage: null },
+    nudge: parts.nudge,
     events: parts.events.slice(0, 100),
   }
 }

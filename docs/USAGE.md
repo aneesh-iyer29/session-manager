@@ -58,6 +58,27 @@ fires on each automatic switch (turn off with *Notifications*).
 Poll interval is 60 s by default (minimum 15). Accounts fetched within the last 60 s are
 skipped unless you press Refresh.
 
+## Compact nudge
+
+A swap in the middle of a long Claude Code conversation makes the next request re-cache the
+whole context on the new account (one full uncached read, priced as a cache write). The nudge
+gets you to `/compact` first.
+
+1. In the Auto-swap panel, click **Install** on "Claude Code compact nudge". This writes
+   `~/.claude/hooks/session-manager-nudge.sh` and registers it as a `UserPromptSubmit` hook in
+   `~/.claude/settings.json`. Nothing else in that file is touched; **Remove** takes it back out.
+2. Set **Warn at (%)**, default 80. When the active account's worst gating window reaches it
+   (and auto-swap is armed, not in dry run), the hero card shows a "Swap soon" notice and the
+   app raises a flag file the hook reads.
+3. Pick the **Nudge** behaviour. *Block once* (default): the next message you send in
+   Claude Code is stopped once with "run /compact now, then send your message again"; later
+   prompts go through, with a short note to Claude. *Context only*: nothing is stopped;
+   Claude is told a swap is near and may remind you once.
+
+The flag clears on its own once the account is below the warn line again, or after the swap.
+The hook is silent whenever there is no flag. Session Manager only needs to be running; the
+hook works in every Claude Code session on the machine.
+
 ## Codex panel
 
 Shows the Codex CLI's account when `~/.codex/auth.json` has a ChatGPT login: plan, email,
@@ -88,6 +109,9 @@ window hides it; quit from the menu or ⌘Q.
 | Notifications | on | macOS notification on automatic switches. |
 | Launch at login | off | Register as a login item. |
 | Show in Dock | on | Off = menu-bar only. |
+
+| Warn at | 80 | Raise the compact nudge when the active account's worst gating window reaches this |
+| Nudge | Block once | What the Claude Code hook does with the flag |
 
 ## Files
 

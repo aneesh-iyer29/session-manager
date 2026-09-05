@@ -23,6 +23,7 @@ import { MAX_POLL_INTERVAL_SECONDS, type Store, type StoredAccount } from './sto
 import * as claudeOauth from './claudeOauth'
 import * as codex from './codex'
 import * as switcher from './switcher'
+import * as nudge from './nudge'
 import * as autoswap from './autoswap'
 import { readActiveCredential, writeActiveCredential } from './keychain'
 
@@ -140,6 +141,13 @@ export function validateSettingsPatch(patch: Partial<Settings>, current: Setting
       case 'model':
         if (typeof value !== 'string' || !value.trim()) throw new Error('model must not be empty')
         next.model = value.trim()
+        break
+      case 'warnPct':
+        next.warnPct = Math.round(assertNumber(key, value, 50, 100))
+        break
+      case 'nudgeMode':
+        if (value !== 'block' && value !== 'context') throw new Error('nudgeMode must be "block" or "context"')
+        next.nudgeMode = value
         break
       case 'autoswapEnabled':
       case 'dryRun':
@@ -296,6 +304,7 @@ export class Daemon {
       settings,
       accounts,
       codex: this.codexState,
+      nudge: { hookInstalled: nudge.isHookInstalled(), pending: nudge.readFlag() },
       events: this.store.readEvents(EVENT_LIMIT),
     }
   }
@@ -355,6 +364,7 @@ export class Daemon {
       }
       await this.guard('codex', () => this.refreshCodex(settings, force))
       if (settings.autoswapEnabled) await this.guard('autoswap', () => this.runAutoswap(settings))
+      await this.guard('nudge', async () => this.updateNudge(settings))
       this.lastPollAt = now
     } catch (err) {
       try {
@@ -499,6 +509,56 @@ export class Daemon {
     this.codexBackoffUntil = failed ? nowMs + CODEX_BACKOFF_MS : 0
   }
 
+  /**
+   * Raise the compact-nudge flag while an automatic swap is close: the active
+   * account's worst gating window is at or past `warnPct` and auto-swap is
+   * armed for real. Clear it otherwise. The id is stable for one episode so
+   * the hook blocks a prompt at most once per approach to the line.
+   */
+  private updateNudge(settings: Settings): void {
+    const state = this.store.loadState()
+    const active = state.activeId ? this.store.getAccount(state.activeId) : null
+    const usage = active ? (this.store.loadUsage()[active.id] ?? null) : null
+    const worst = active && settings.autoswapEnabled && !settings.dryRun ? autoswap.bindingWindow(usage, settings.model) : null
+    if (!active || !worst || worst.pct < settings.warnPct) {
+      if (nudge.readFlag()) {
+        nudge.clearFlag()
+        this.store.appendEvent('info', 'Compact nudge cleared', active?.id ?? null)
+      }
+      return
+    }
+    const label = active.alias || active.email
+    const pct = Math.round(worst.pct)
+    const flag = {
+      id: `${active.id}:${worst.key}:${worst.resetsAt ?? 'unknown'}`,
+      at: iso(this.now()),
+      accountId: active.id,
+      label,
+      window: worst.label,
+      pct,
+      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${settings.threshold}%.`,
+    }
+    const previous = nudge.readFlag()
+    nudge.writeFlag(flag, settings.nudgeMode)
+    if (!previous || previous.id !== flag.id) {
+      this.store.appendEvent('info', `Compact nudge raised: ${flag.message}`, active.id)
+    }
+  }
+
+  installHook(): AppState {
+    nudge.installHook()
+    this.store.appendEvent('info', 'Claude Code compact-nudge hook installed')
+    this.emit()
+    return this.getState()
+  }
+
+  uninstallHook(): AppState {
+    nudge.uninstallHook()
+    this.store.appendEvent('info', 'Claude Code compact-nudge hook removed')
+    this.emit()
+    return this.getState()
+  }
+
   private async runAutoswap(settings: Settings): Promise<void> {
     const state = this.store.loadState()
     const usage = this.store.loadUsage()
@@ -538,6 +598,7 @@ export class Daemon {
     this.require(accountId)
     const acc = await switcher.switchTo(this.store, accountId, this.switcherDeps())
     this.lastAttempt.delete(acc.id)
+    this.updateNudge(this.settings())
     this.emit()
     return this.getState()
   }

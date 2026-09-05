@@ -180,6 +180,26 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
   reach the port; it must not be able to complete *or* abort the login), and only the first
   matching callback is exchanged.
 
+## Compact nudge (`src/main/nudge.ts`)
+
+A swap mid-conversation makes the next request re-cache the whole context on the new account.
+Nothing outside Claude Code can trigger `/compact`, but a `UserPromptSubmit` hook can stop a
+prompt with a message or hand Claude context. So:
+
+* After every poll (and every manual switch) the daemon computes the active account's worst
+  gating window. If auto-swap is enabled, not in dry run, and that window is at or past
+  `settings.warnPct`, it writes `<dataDir>/swap-pending.txt` (line 1 episode id, line 2
+  `nudgeMode`, rest message) plus a JSON twin for the UI. Otherwise it removes both. The id is
+  `accountId:windowKey:resetsAt`, stable for one approach to the line.
+* `installHook()` writes `~/.claude/hooks/session-manager-nudge.sh` (0755) and registers it
+  under `hooks.UserPromptSubmit` in `~/.claude/settings.json`, preserving every other key and
+  refusing to touch an unparsable file. `uninstallHook()` removes exactly that entry and the
+  script. Both honour `CLAUDE_CONFIG_DIR`.
+* The script (bash + sed only) reads the flag from `$CLAUDE_SWAPPER_HOME` or the default data
+  dir. In `block` mode it exits 2 with the message on stderr for the first prompt of an episode
+  (recording the id in `swap-pending.nudged`) and adds `additionalContext` afterwards; in
+  `context` mode it only adds context. No flag → exit 0, no output.
+
 ## Window and tray
 
 * One `BrowserWindow`, 1040×720 default, min 860×600, `titleBarStyle: 'hiddenInset'`,

@@ -812,3 +812,53 @@
 .toast__close:hover {
   opacity: 1;
 }
+
+/* ---- notice (compact nudge) ---------------------------------------- */
+/* A quiet inline advisory inside a card: gold rule, one line, one action. */
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding: 8px 10px 8px 12px;
+  border: 1px solid var(--gold);
+  border-left-width: 4px;
+  border-radius: var(--radius-card);
+  background: var(--gold-tint);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.notice__label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.notice__body {
+  flex: 1;
+  min-width: 0;
+  color: var(--text);
+}
+
+.notice__body code {
+  font-family: var(--mono);
+  font-weight: 700;
+}
+
+.hook-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hook-row__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}

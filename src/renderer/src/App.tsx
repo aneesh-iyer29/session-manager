@@ -55,7 +55,7 @@ function Dashboard({ state }: { state: AppState }) {
               <div className="section__head">
                 <span className="eyebrow">Active</span>
               </div>
-              {active ? <HeroCard account={active} settings={state.settings} now={now} actions={actions} /> : null}
+              {active ? <HeroCard account={active} settings={state.settings} now={now} actions={actions} nudge={state.nudge.pending} /> : null}
               {!active && state.accounts.length === 0 ? <EmptyState actions={actions} login={login} /> : null}
               {!active && state.accounts.length > 0 ? (
                 <div className="card">

@@ -84,6 +84,14 @@ can't corrupt either. Before overwriting, the live credential is saved back into
 outgoing account's slot so a token Claude Code rotated is not lost. Running Claude Code
 sessions pick up the new login on their next request.
 
+## Compact before the swap
+
+Swapping mid-conversation costs one full re-cache of that conversation on the new account.
+Session Manager can install a small Claude Code `UserPromptSubmit` hook: when the active account
+reaches the warn line (default 80%), your next prompt is stopped once with "run `/compact` now",
+so the context is compacted before it moves. Install or remove it from the Auto-swap panel;
+details in [docs/USAGE.md](docs/USAGE.md#compact-nudge).
+
 ## Menu bar and launch at login
 
 The tray item shows the active account's short name and binding-window percent. Its menu
