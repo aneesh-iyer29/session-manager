@@ -88,8 +88,11 @@ panel only reports that it is configured. *Hide* in the panel header turns it of
 
 ## Menu bar
 
-Title: `<alias or email local-part> <binding pct>%`. Menu: Open Session Manager, Refresh
-now, Accounts ▸ (headroom per account; click to switch), Auto-swap, Launch at login, Quit.
+The menu bar item is the brand mark alone, no text. Click it for a glance menu: each
+account with a usage bar per window (5-hour, Weekly, Fable weekly) and its reset countdown,
+the Codex account, and one status line (auto-swap state, last poll). The only actions are
+**Open Session Manager** and **Quit**; switching and settings live in the window so the menu
+can never change anything by accident. Clicking any row opens the window.
 *Show in Dock* off hides the Dock icon; the app then lives only in the menu bar. Closing the
 window hides it; quit from the menu or ⌘Q.
 

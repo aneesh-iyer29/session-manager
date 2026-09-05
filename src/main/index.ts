@@ -52,14 +52,7 @@ function main(): void {
     deps: { openUrl: (url) => void shell.openExternal(url), notify },
   })
 
-  const trayActions = {
-    open: showWindow,
-    refresh: () => void daemon.refresh(true).catch(() => undefined),
-    switchTo: (id: string) => void daemon.switchTo(id).catch((err: unknown) => notify('Switch failed', String(err instanceof Error ? err.message : err))),
-    setAutoswap: (enabled: boolean) => daemon.updateSettings({ autoswapEnabled: enabled }),
-    setLaunchAtLogin: (enabled: boolean) => daemon.updateSettings({ launchAtLogin: enabled }),
-    quit: () => app.quit(),
-  }
+  const trayActions = { open: showWindow, quit: () => app.quit() }
 
   registerIpc(daemon)
   createTray(trayActions)
