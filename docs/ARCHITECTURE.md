@@ -52,9 +52,9 @@ docs/           this file, USAGE.md
 | Keychain item service `Claude Code-credentials`, account `$USER` | Claude Code's active OAuth credential |
 | `~/.codex/auth.json` (or `$CODEX_HOME/auth.json`) | Codex CLI login |
 
-`CLAUDE_SWAPPER_HOME` overrides the data directory (used by tests and the smoke launch).
-`CLAUDE_SWAPPER_SMOKE_MS=<ms>` makes `index.ts` print one `smoke: windows=… tray=… rendererChars=…`
-line after that delay and quit (`CLAUDE_SWAPPER_SMOKE_PNG=<path>` also saves a screenshot);
+`SESSION_MANAGER_HOME` overrides the data directory (used by tests and the smoke launch).
+`SESSION_MANAGER_SMOKE_MS=<ms>` makes `index.ts` print one `smoke: windows=… tray=… rendererChars=…`
+line after that delay and quit (`SESSION_MANAGER_SMOKE_PNG=<path>` also saves a screenshot);
 `npm run smoke` wraps it.
 
 ## Credential shapes
@@ -195,7 +195,7 @@ prompt with a message or hand Claude context. So:
   under `hooks.UserPromptSubmit` in `~/.claude/settings.json`, preserving every other key and
   refusing to touch an unparsable file. `uninstallHook()` removes exactly that entry and the
   script. Both honour `CLAUDE_CONFIG_DIR`.
-* The script (bash + sed only) reads the flag from `$CLAUDE_SWAPPER_HOME` or the default data
+* The script (bash + sed only) reads the flag from `$SESSION_MANAGER_HOME` or the default data
   dir. In `block` mode it exits 2 with the message on stderr for the first prompt of an episode
   (recording the id in `swap-pending.nudged`) and adds `additionalContext` afterwards; in
   `context` mode it only adds context. No flag → exit 0, no output.

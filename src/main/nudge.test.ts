@@ -93,7 +93,7 @@ describe('hook installer', () => {
 })
 
 describe('hook script', () => {
-  const run = () => spawnSync('/bin/bash', [scriptPath], { env: { ...process.env, CLAUDE_SWAPPER_HOME: dir }, input: '{}', encoding: 'utf8' })
+  const run = () => spawnSync('/bin/bash', [scriptPath], { env: { ...process.env, SESSION_MANAGER_HOME: dir }, input: '{}', encoding: 'utf8' })
 
   it('is silent with no flag', () => {
     installHook(settingsPath, scriptPath)
@@ -127,6 +127,6 @@ describe('hook script', () => {
 
   it('is executable', () => {
     installHook(settingsPath, scriptPath)
-    expect(execFileSync(scriptPath, { env: { ...process.env, CLAUDE_SWAPPER_HOME: dir }, encoding: 'utf8' })).toBe('')
+    expect(execFileSync(scriptPath, { env: { ...process.env, SESSION_MANAGER_HOME: dir }, encoding: 'utf8' })).toBe('')
   })
 })

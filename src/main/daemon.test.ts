@@ -1,5 +1,5 @@
 /**
- * Daemon tests. Hermetic: the store lives in a temp CLAUDE_SWAPPER_HOME, Claude
+ * Daemon tests. Hermetic: the store lives in a temp SESSION_MANAGER_HOME, Claude
  * Code's config home (locks, ~/.claude.json) is a temp CLAUDE_CONFIG_DIR, the
  * Keychain is a variable behind readActive/writeActive, and every HTTP call goes
  * to a scripted fetch. The real store, switcher, autoswap and claudeOauth run.
@@ -69,7 +69,7 @@ function json(body: unknown, status = 200): Response {
 let dir = ''
 
 function harness(opts: { autoswap?: boolean; cred2?: string } = {}): Harness {
-  const store = new Store(process.env.CLAUDE_SWAPPER_HOME as string)
+  const store = new Store(process.env.SESSION_MANAGER_HOME as string)
   const cred1 = credential('tok-1', 'ref-1')
   const cred2 = opts.cred2 ?? credential('tok-2', 'ref-2')
   store.upsertAccount(account('acc_1', 'work@example.com', cred1))
@@ -141,7 +141,7 @@ function harness(opts: { autoswap?: boolean; cred2?: string } = {}): Harness {
 // for the store, the lock directories and ~/.claude.json to land in the temp dir.
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), 'swapper-daemon-'))
-  process.env.CLAUDE_SWAPPER_HOME = join(dir, 'data')
+  process.env.SESSION_MANAGER_HOME = join(dir, 'data')
   process.env.CLAUDE_CONFIG_DIR = join(dir, 'claude')
   mkdirSync(process.env.CLAUDE_CONFIG_DIR, { recursive: true })
 })
@@ -246,7 +246,7 @@ describe('autoswap', () => {
     expect(state.nudge.pending?.accountId).toBe('acc_1')
     expect(state.nudge.pending?.pct).toBe(84)
     expect(state.nudge.pending?.message).toContain('will be swapped at 90%')
-    const flagText = readFileSync(join(process.env.CLAUDE_SWAPPER_HOME as string, 'swap-pending.txt'), 'utf8')
+    const flagText = readFileSync(join(process.env.SESSION_MANAGER_HOME as string, 'swap-pending.txt'), 'utf8')
     expect(flagText.split('\n')[1]).toBe('block')
     expect(state.events.filter((e) => e.message.startsWith('Compact nudge raised')).length).toBe(1)
     // Same episode on the next poll: no duplicate event.
@@ -259,7 +259,7 @@ describe('autoswap', () => {
     state = await h.daemon.refresh()
     expect(state.activeId).toBe('acc_2')
     expect(state.nudge.pending).toBeNull()
-    expect(existsSync(join(process.env.CLAUDE_SWAPPER_HOME as string, 'swap-pending.txt'))).toBe(false)
+    expect(existsSync(join(process.env.SESSION_MANAGER_HOME as string, 'swap-pending.txt'))).toBe(false)
   })
 
   it('never raises the flag in dry run or with auto-swap off', async () => {

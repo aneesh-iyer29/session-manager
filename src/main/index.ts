@@ -44,7 +44,7 @@ function applySystemSettings(state: AppState, previous: AppState | null): void {
 }
 
 function main(): void {
-  if (!process.env.CLAUDE_SWAPPER_HOME) setDataDir(app.getPath('userData'))
+  if (!process.env.SESSION_MANAGER_HOME) setDataDir(app.getPath('userData'))
   const store = new Store(dataDir())
   const daemon = new Daemon({
     store,
@@ -85,7 +85,7 @@ function main(): void {
   app.on('window-all-closed', () => undefined)
 
   // Headless smoke test (`npm run smoke`): report what came up, then quit.
-  const smokeMs = Number(process.env.CLAUDE_SWAPPER_SMOKE_MS)
+  const smokeMs = Number(process.env.SESSION_MANAGER_SMOKE_MS)
   if (smokeMs > 0) setTimeout(() => void smokeReport(daemon).finally(() => app.quit()), smokeMs)
 }
 
@@ -102,9 +102,9 @@ async function smokeReport(daemon: Daemon): Promise<void> {
     try {
       const text: unknown = await win.webContents.executeJavaScript('document.body.innerText')
       rendererChars = typeof text === 'string' ? text.length : -1
-      const png = process.env.CLAUDE_SWAPPER_SMOKE_PNG
+      const png = process.env.SESSION_MANAGER_SMOKE_PNG
       if (png) writeFileSync(png, (await win.capturePage()).toPNG())
-      const trayPng = process.env.CLAUDE_SWAPPER_SMOKE_TRAY_PNG
+      const trayPng = process.env.SESSION_MANAGER_SMOKE_TRAY_PNG
       const frame = trayFrame()
       if (trayPng && frame) writeFileSync(trayPng, frame.toPNG())
     } catch (err) {

@@ -21,7 +21,7 @@ Nothing leaves your machine except the calls to Anthropic's and OpenAI's own API
 ## Install
 
 **Download.** Grab `Session Manager-<version>-arm64.dmg` (or `x64`) from
-[Releases](https://github.com/aneesh-iyer29/claude-swapper/releases), open it, and drag the
+[Releases](https://github.com/aneesh-iyer29/session-manager/releases), open it, and drag the
 app to Applications. Builds are unsigned, so the first launch needs either right-click →
 Open, or:
 
@@ -135,7 +135,7 @@ npm run dev        # Electron with hot reload
 npm run dev:web    # renderer only, in a browser with the mock backend (port 5180)
 npm run typecheck && npm run lint && npm test
 npm run build      # bundle to out/
-CLAUDE_SWAPPER_HOME=$(mktemp -d) npm run smoke   # launch headless against a scratch data dir
+SESSION_MANAGER_HOME=$(mktemp -d) npm run smoke   # launch headless against a scratch data dir
 npm run dist:dir   # unsigned dist/mac-arm64/Session Manager.app; npm run dist adds DMGs and zips
 ```
 

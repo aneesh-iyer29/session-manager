@@ -1,7 +1,7 @@
 {
-  "name": "claude-swapper",
+  "name": "session-manager",
   "productName": "Session Manager",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "description": "Usage dashboard and auto-swapper for multiple Claude Code accounts, with a read-only Codex quota view",
   "main": "./out/main/index.js",
   "type": "module",
@@ -10,7 +10,7 @@
   "author": "Aneesh Iyer",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/aneesh-iyer29/claude-swapper.git"
+    "url": "git+https://github.com/aneesh-iyer29/session-manager.git"
   },
   "scripts": {
     "dev": "electron-vite dev",
@@ -23,7 +23,7 @@
     "test:watch": "vitest",
     "dist": "npm run build && electron-builder --mac",
     "dist:dir": "npm run build && electron-builder --mac --dir",
-    "smoke": "npm run build && CLAUDE_SWAPPER_SMOKE_MS=8000 ELECTRON_ENABLE_LOGGING=1 electron ."
+    "smoke": "npm run build && SESSION_MANAGER_SMOKE_MS=8000 ELECTRON_ENABLE_LOGGING=1 electron ."
   },
   "dependencies": {
     "motion": "^13.0.0",

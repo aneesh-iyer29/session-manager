@@ -3,6 +3,13 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.3.4] - 2026-09-04
+
+### Changed
+
+- Repository, package, app id, and env vars renamed from claude-swapper to session-manager
+  (`SESSION_MANAGER_HOME`, `SESSION_MANAGER_SMOKE_*`). Data folder is unchanged.
+
 ## [0.3.3] - 2026-09-04
 
 ### Changed

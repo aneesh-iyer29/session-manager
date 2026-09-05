@@ -79,7 +79,7 @@ export const HOOK_SCRIPT = `#!/bin/bash
 # Claude Code UserPromptSubmit hook: when the app has raised a swap-pending flag
 # (the active account is near its auto-swap line), ask for a /compact first so
 # the conversation is not re-cached in full on the next account.
-dir="\${CLAUDE_SWAPPER_HOME:-$HOME/Library/Application Support/Session Manager}"
+dir="\${SESSION_MANAGER_HOME:-$HOME/Library/Application Support/Session Manager}"
 flag="$dir/swap-pending.txt"
 [ -f "$flag" ] || exit 0
 { IFS= read -r id; IFS= read -r mode; msg="$(cat)"; } < "$flag"
