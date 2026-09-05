@@ -16,9 +16,14 @@ export interface PolicyAccount {
   usage: Usage | null
 }
 
-/** The windows that can block an account: 5h, weekly, and `model:<model>` if present. */
+/**
+ * The windows that can block an account: 5h, weekly, and `model:<model>` if
+ * present. A failed poll keeps the last known windows (with `ok: false`), and
+ * those still count: stale numbers beat no numbers for both the gauge and the
+ * policy, and `fetchedAt` tells the UI how old they are.
+ */
 export function gatingWindows(usage: Usage | null | undefined, model = 'Fable'): UsageWindow[] {
-  if (!usage || !usage.ok) return []
+  if (!usage) return []
   const keys = new Set(['five_hour', 'seven_day', `model:${model.toLowerCase()}`])
   return (usage.windows ?? []).filter(
     (w) => w && keys.has(w.key) && typeof w.pct === 'number' && Number.isFinite(w.pct),

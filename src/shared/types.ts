@@ -70,7 +70,7 @@ export interface Settings {
   margin: number
   /** >= 0. Minimum seconds between automatic switches. */
   cooldownSeconds: number
-  /** >= 15. */
+  /** >= 15. The active account is fetched every poll; standby accounts at most every 5 minutes unless near the threshold. */
   pollIntervalSeconds: number
   strategy: Strategy
   /** Display name of the per-model weekly window that gates swapping. Default "Fable". */
@@ -164,7 +164,7 @@ export const DEFAULT_SETTINGS: Settings = {
   threshold: 90,
   margin: 10,
   cooldownSeconds: 300,
-  pollIntervalSeconds: 60,
+  pollIntervalSeconds: 120,
   strategy: 'best',
   model: 'Fable',
   codexEnabled: true,

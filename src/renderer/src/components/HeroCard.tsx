@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import type { Account, NudgeFlag, Settings } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatPlan, secondaryWindows } from '../lib/format'
+import { formatClock, formatPlan, secondaryWindows } from '../lib/format'
 import { spring } from '../lib/motion'
 import { Button } from './Button'
 import { Gauge } from './Gauge'
@@ -56,7 +56,11 @@ export function HeroCard({ account, settings, now, actions, nudge = null }: Prop
         </div>
       ) : null}
 
-      {usage && !usage.ok && usage.error ? <p className="card__note card__note--danger">{usage.error}</p> : null}
+      {usage && !usage.ok && usage.error && usage.windows.length > 0 ? (
+        <p className="card__note card__note--warn">
+          {usage.error} · numbers from {formatClock(usage.fetchedAt)}
+        </p>
+      ) : null}
 
       {nudge && nudge.accountId === account.id ? (
         <div className="notice" role="status">

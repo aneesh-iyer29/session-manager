@@ -160,8 +160,9 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
 
 ## Daemon (`src/main/daemon.ts`)
 
-* Every `pollIntervalSeconds`: refresh usage for every enabled account (skip ones fetched
-  < 60 s ago unless forced), refresh the Codex snapshot, then if `autoswapEnabled` run
+* Every `pollIntervalSeconds` (default 120): refresh usage for enabled accounts — the active one
+  if not fetched < 60 s ago, standby ones < 5 min ago unless within 10 points of the threshold
+  (forced polls ignore the gaps), refresh the Codex snapshot, then if `autoswapEnabled` run
   `decide` and perform the switch. Errors never kill the loop; they become `error` events.
 * Before polling, the live Keychain credential is matched to a stored account by fingerprint,
   or by `activeId` when `~/.claude.json` still names that account's email (Claude Code rotated

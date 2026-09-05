@@ -28,7 +28,7 @@ export function Toolbar({ state, now, actions }: Props) {
       <span className="toolbar__title">Session Manager</span>
       <div className="toolbar__controls">
         <ArmedPill armed={armed} />
-        <span className="toolbar__age" aria-live="polite" title={state.polling.lastPollAt ? `Last poll ${new Date(state.polling.lastPollAt).toLocaleTimeString()}` : undefined}>
+        <span className="toolbar__age" aria-live="polite">
           {formatAgo(state.polling.lastPollAt, now)}
         </span>
         <Button size="sm" onClick={() => actions.refresh()} disabled={refreshing} aria-label="Refresh usage">

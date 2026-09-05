@@ -29,6 +29,9 @@ import { readActiveCredential, writeActiveCredential } from './keychain'
 
 /** Usage fetched more recently than this is reused unless the poll is forced. */
 const MIN_FETCH_GAP_MS = 60_000
+/** Standby accounts change slowly; poll them every few minutes unless they are close to the line. */
+const STANDBY_FETCH_GAP_MS = 5 * 60_000
+const NEAR_LINE_PTS = 10
 /** Fallback back-off after a 429 without a Retry-After. */
 const RATE_LIMIT_BACKOFF_MS = 10 * 60_000
 /** How long a failed Codex refresh/usage call holds the next attempt off (a dead refresh token must not be retried every poll). */
@@ -353,10 +356,13 @@ export class Daemon {
       const settings = this.settings()
       const now = this.now()
       await this.guard('sync active credential', () => this.syncActiveCredential())
+      const activeId = this.store.loadState().activeId
+      const usageNow = this.store.loadUsage()
       for (const acc of this.store.listAccounts()) {
         if (acc.disabled) continue
         const last = this.lastAttempt.get(acc.id)
-        if (!force && last !== undefined && now.getTime() - last < MIN_FETCH_GAP_MS) continue
+        const gap = this.fetchGap(acc, activeId, usageNow[acc.id] ?? null, settings)
+        if (!force && last !== undefined && now.getTime() - last < gap) continue
         const held = this.backoffUntil.get(acc.id)
         if (held !== undefined && now.getTime() < held) continue
         this.lastAttempt.set(acc.id, now.getTime())
@@ -373,6 +379,19 @@ export class Daemon {
         // the store itself is unwritable; nothing more to do this round
       }
     }
+  }
+
+  /**
+   * How long to leave an account alone between usage fetches. The active
+   * account is watched every poll; a standby one only every few minutes unless
+   * it is within a few points of the threshold, where a swap decision may hinge
+   * on it. Keeps the usage endpoint's budget intact with many accounts.
+   */
+  private fetchGap(acc: StoredAccount, activeId: string | null, usage: Usage | null, settings: Settings): number {
+    if (acc.id === activeId) return MIN_FETCH_GAP_MS
+    const worst = autoswap.bindingWindow(usage, settings.model)
+    if (worst && worst.pct >= settings.threshold - NEAR_LINE_PTS) return MIN_FETCH_GAP_MS
+    return STANDBY_FETCH_GAP_MS
   }
 
   /** Errors never kill the loop; they become `error` events the user can read. */
@@ -463,11 +482,20 @@ export class Daemon {
       this.recordUsage(acc, claudeOauth.normalizeUsage(raw, settings.model), null, 'ok')
     } catch (err) {
       const ue = err instanceof claudeOauth.UsageError ? err : claudeOauth.classifyUsageError(err)
+      let message = describe(ue)
       if (ue.kind === 'rate_limited') {
-        this.backoffUntil.set(acc.id, this.now().getTime() + (ue.retryAfterMs ?? RATE_LIMIT_BACKOFF_MS))
+        const waitMs = ue.retryAfterMs ?? RATE_LIMIT_BACKOFF_MS
+        this.backoffUntil.set(acc.id, this.now().getTime() + waitMs)
+        message = `Rate limited by Anthropic · retrying in ${Math.max(1, Math.round(waitMs / 60_000))} min`
+      } else if (ue.kind === 'unauthorized') {
+        message = 'Token rejected · refreshing on the next poll'
+      } else if (ue.kind === 'network') {
+        message = 'No connection · retrying'
+      } else if (ue.kind === 'server') {
+        message = `Anthropic error${ue.status ? ` ${ue.status}` : ''} · retrying`
       }
       const status: TokenStatus = ue.kind === 'unauthorized' ? 'expired' : acc.tokenStatus
-      this.recordUsage(acc, null, describe(ue), status)
+      this.recordUsage(acc, null, message, status)
     }
   }
 

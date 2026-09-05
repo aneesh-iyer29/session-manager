@@ -32,7 +32,9 @@ describe('gating windows and headroom', () => {
     expect(headroom(usage)).toBe(20)
     expect(bindingWindow(usage)?.key).toBe('model:fable')
     expect(headroom(null)).toBeNull()
-    expect(headroom(makeUsage({ ok: false }))).toBeNull()
+    // A failed poll keeps the last windows: stale numbers still count, empty ones do not.
+    expect(headroom({ ...makeUsage({ five: 10, week: 20 }), ok: false })).toBe(80)
+    expect(headroom({ ...makeUsage({ ok: false }), windows: [] })).toBeNull()
     expect(gatingWindows(usage, 'Other').map((w) => w.key)).toEqual(['five_hour', 'seven_day', 'model:other'])
   })
 
@@ -67,7 +69,7 @@ describe('decide', () => {
         acct('acc_2', makeUsage({ five: 5, week: 40 })), // headroom 60
         acct('acc_3', makeUsage({ five: 0, week: 0 }), false, true), // best but disabled
         acct('acc_4', null), // never fetched
-        acct('acc_5', makeUsage({ ok: false })), // fetch failed
+        acct('acc_5', { ...makeUsage({ ok: false }), windows: [] }), // fetch failed, nothing known
         acct('acc_6', makeUsage({ five: 20, week: 30 })), // headroom 70
       ],
       SETTINGS,

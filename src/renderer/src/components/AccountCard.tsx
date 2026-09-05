@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import type { Account, Settings } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatPlan, secondaryWindows } from '../lib/format'
+import { formatClock, formatPlan, secondaryWindows } from '../lib/format'
 import { spring } from '../lib/motion'
 import { Button } from './Button'
 import { Gauge } from './Gauge'
@@ -57,7 +57,11 @@ export function AccountCard({ account, settings, now, actions }: Props) {
         </div>
       ) : null}
 
-      {usage && !usage.ok && usage.error ? <p className="card__note card__note--danger">{usage.error}</p> : null}
+      {usage && !usage.ok && usage.error && usage.windows.length > 0 ? (
+        <p className="card__note card__note--warn">
+          {usage.error} · numbers from {formatClock(usage.fetchedAt)}
+        </p>
+      ) : null}
 
       <div className="card__actions">
         <Button variant="primary" size="sm" disabled={switching || dead} onClick={() => actions.switchTo(account)} title={dead ? 'Log in again to use this account' : undefined}>

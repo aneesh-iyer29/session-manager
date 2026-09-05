@@ -862,3 +862,7 @@
   gap: 2px;
   min-width: 0;
 }
+
+.card__note--warn {
+  color: var(--warn);
+}
