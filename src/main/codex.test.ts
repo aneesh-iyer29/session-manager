@@ -104,6 +104,27 @@ describe('normalizeUsage', () => {
     expect(usage.plan).toBeNull()
     expect(normalizeUsage({}, NOW).windows).toEqual([])
   })
+
+  it('labels windows by their length, not their slot, shortest first', () => {
+    const raw = {
+      rate_limit: {
+        primary_window: { used_percent: 1, limit_window_seconds: 604800, reset_at: 1757545200 },
+        secondary_window: { used_percent: 12, limit_window_seconds: 18000, reset_at: 1757030400 },
+      },
+    }
+    expect(normalizeUsage(raw, NOW).windows.map((w) => [w.key, w.label, w.pct])).toEqual([
+      ['five_hour', '5-hour', 12],
+      ['seven_day', 'Weekly', 1],
+    ])
+    const day = normalizeUsage({ rate_limit: { primary_window: { used_percent: 3, limit_window_seconds: 86400 } } }, NOW)
+    expect(day.windows[0]).toMatchObject({ key: 'window:24h', label: '24-hour' })
+  })
+
+  it('a slot with no length whose reset is days away is the weekly window', () => {
+    const reset = Math.floor((NOW.getTime() + (6 * 24 + 23) * 3_600_000) / 1000)
+    const usage = normalizeUsage({ rate_limit: { primary_window: { used_percent: 1, reset_at: reset } } }, NOW)
+    expect(usage.windows).toEqual([{ key: 'seven_day', label: 'Weekly', pct: 1, resetsAt: '2026-09-11T17:00:00Z' }])
+  })
 })
 
 describe('needsRefresh / maybeRefresh', () => {

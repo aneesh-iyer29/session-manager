@@ -215,14 +215,46 @@ function resetAt(win: Record<string, unknown>, now: Date): string | null {
   return null
 }
 
-/** `wham/usage` → the shared normalized shape (primary = 5h, secondary = weekly). */
+const FIVE_HOURS_S = 5 * 3600
+const ONE_WEEK_S = 7 * 86400
+
+/**
+ * Which shared window a Codex window is, from how long it spans. The slot name
+ * (`primary_window` / `secondary_window`) is not a safe guide: accounts have
+ * come back with the weekly window in the primary slot, which then read as a
+ * 5-hour limit resetting in six days. Lengths that are neither get an honest
+ * label of their own rather than being forced into one of the two.
+ */
+function classify(seconds: number): Pick<UsageWindow, 'key' | 'label'> {
+  if (seconds <= 6 * 3600) return { key: 'five_hour', label: '5-hour' }
+  if (seconds >= 6 * 86400) return { key: 'seven_day', label: 'Weekly' }
+  const hours = Math.round(seconds / 3600)
+  if (hours < 48) return { key: `window:${hours}h`, label: `${hours}-hour` }
+  const days = Math.round(hours / 24)
+  return { key: `window:${days}d`, label: `${days}-day` }
+}
+
+/**
+ * How long a window spans: `limit_window_seconds` when the API says, else the
+ * slot's nominal length, unless the reset lies further out than that, which
+ * proves the slot holds a longer window.
+ */
+function windowSeconds(win: Record<string, unknown>, nominal: number, now: Date): number {
+  const secs = win.limit_window_seconds
+  if (typeof secs === 'number' && Number.isFinite(secs) && secs > 0) return secs
+  const reset = resetAt(win, now)
+  const ahead = reset ? (Date.parse(reset) - now.getTime()) / 1000 : Number.NaN
+  return ahead > nominal * 1.2 ? ahead : nominal
+}
+
+/** `wham/usage` → the shared normalized shape, shortest window first. */
 export function normalizeUsage(raw: unknown, now: Date = new Date()): Usage {
   const r = isRecord(raw) ? raw : {}
   const limits = isRecord(r.rate_limit) ? r.rate_limit : isRecord(r.rate_limits) ? r.rate_limits : {}
-  const windows: UsageWindow[] = []
-  for (const [keys, outKey, label] of [
-    [['primary_window', 'primary'], 'five_hour', '5-hour'],
-    [['secondary_window', 'secondary'], 'seven_day', 'Weekly'],
+  const ranked: Array<{ seconds: number; window: UsageWindow }> = []
+  for (const [keys, nominal] of [
+    [['primary_window', 'primary'], FIVE_HOURS_S],
+    [['secondary_window', 'secondary'], ONE_WEEK_S],
   ] as const) {
     let win: Record<string, unknown> | null = null
     for (const k of keys) {
@@ -235,13 +267,17 @@ export function normalizeUsage(raw: unknown, now: Date = new Date()): Usage {
     if (!win) continue
     const pct = win.used_percent ?? win.percent_used
     if (typeof pct !== 'number' || !Number.isFinite(pct)) continue
-    windows.push({
-      key: outKey,
-      label,
-      pct: Math.round(Math.min(Math.max(pct, 0), 100) * 10) / 10,
-      resetsAt: resetAt(win, now),
+    const seconds = windowSeconds(win, nominal, now)
+    ranked.push({
+      seconds,
+      window: {
+        ...classify(seconds),
+        pct: Math.round(Math.min(Math.max(pct, 0), 100) * 10) / 10,
+        resetsAt: resetAt(win, now),
+      },
     })
   }
+  const windows = ranked.sort((a, b) => a.seconds - b.seconds).map((x) => x.window)
   return { fetchedAt: utcNowIso(now), ok: true, error: null, windows, plan: str(r.plan_type) ?? null }
 }
 
