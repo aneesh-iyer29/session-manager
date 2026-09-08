@@ -71,7 +71,8 @@ export function registerIpc(daemon: Daemon): void {
   }
 
   handle(IPC.getState, () => daemon.getState())
-  handle(IPC.refresh, () => daemon.refresh(true))
+  handle(IPC.refresh, () => daemon.refreshClaude())
+  handle(IPC.refreshCodex, () => daemon.refreshCodex())
   handle(IPC.switchTo, (id) => daemon.switchTo(str(id, 'accountId')))
   handle(IPC.captureActive, () => daemon.captureActive())
   handle(IPC.startLogin, () => daemon.startLogin())

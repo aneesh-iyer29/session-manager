@@ -209,6 +209,72 @@ describe('polling', () => {
     expect(state.codex).toEqual({ configured: false, mode: 'none', email: null, plan: null, usage: null })
     expect(h.codexCalls).toBe(0)
   })
+
+  it('refreshClaude polls the accounts without touching Codex', async () => {
+    const h = harness()
+    const state = await h.daemon.refreshClaude()
+    expect(h.store.loadUsage().acc_1?.ok).toBe(true)
+    expect(state.polling.lastPollAt).not.toBeNull()
+    expect(h.codexCalls).toBe(0)
+    expect(state.codex.configured).toBe(false)
+  })
+
+  it('refreshCodex fetches only the Codex snapshot', async () => {
+    const h = harness()
+    const state = await h.daemon.refreshCodex()
+    expect(h.codexCalls).toBe(1)
+    expect(state.codex.mode).toBe('chatgpt')
+    expect(h.store.loadUsage()).toEqual({})
+    expect(state.polling.lastPollAt).toBeNull()
+  })
+
+  it('a full poll that joins a Claude-only refresh still fetches Codex afterwards', async () => {
+    const h = harness()
+    const claudeOnly = h.daemon.refreshClaude()
+    const full = h.daemon.refresh(false)
+    await Promise.all([claudeOnly, full])
+    expect(h.codexCalls).toBe(1)
+    expect(h.daemon.getState().codex.mode).toBe('chatgpt')
+  })
+
+  it('a Claude-only refresh joins a full poll without a second Codex call', async () => {
+    const h = harness()
+    const full = h.daemon.refresh(true)
+    const claudeOnly = h.daemon.refreshClaude()
+    await Promise.all([full, claudeOnly])
+    expect(h.codexCalls).toBe(1)
+  })
+
+  it('a Codex refresh joins the snapshot a poll already started instead of doubling the call', async () => {
+    const h = harness()
+    let calls = 0
+    let release: () => void = () => undefined
+    let reached: () => void = () => undefined
+    const reachedCodex = new Promise<void>((r) => (reached = r))
+    const daemon = new Daemon({
+      store: h.store,
+      version: 'test',
+      deps: {
+        fetchFn: async () => json(usageBody(10)),
+        readActive: async () => h.live.value,
+        writeActive: async () => undefined,
+        codexSnapshot: () => {
+          calls += 1
+          reached()
+          return new Promise<CodexState>((resolve) => (release = () => resolve(CODEX)))
+        },
+        now: () => h.clock.now,
+      },
+    })
+    const poll = daemon.refresh(true)
+    await reachedCodex
+    const manual = daemon.refreshCodex()
+    expect(calls).toBe(1)
+    release()
+    await Promise.all([poll, manual])
+    expect(calls).toBe(1)
+    expect(daemon.getState().codex.mode).toBe('chatgpt')
+  })
 })
 
 describe('live status line feed', () => {
@@ -503,11 +569,14 @@ describe('regressions', () => {
     h.clock.now = new Date('2026-06-01T12:02:00Z')
     await daemon.refresh(false)
     expect(calls).toBe(1) // held off
+    await expect(daemon.refreshCodex()).rejects.toThrow('HTTP 400') // the panel's button ignores the hold and says why
+    expect(calls).toBe(2)
+    expect(daemon.getState().codex.usage?.ok).toBe(false)
     await daemon.refresh(true)
-    expect(calls).toBe(2) // a manual refresh always retries
+    expect(calls).toBe(3) // a forced full poll always retries too
     h.clock.now = new Date('2026-06-01T12:10:00Z')
     await daemon.refresh(false)
-    expect(calls).toBe(3)
+    expect(calls).toBe(4)
   })
 
   it('caps the poll interval so the timer cannot overflow and spin', () => {

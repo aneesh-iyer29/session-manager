@@ -165,6 +165,12 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
   (forced polls ignore the gaps; the endpoint allows ~30 requests/hour per token, shared with
   Claude Code), refresh the Codex snapshot, then if `autoswapEnabled` run
   `decide` and perform the switch. Errors never kill the loop; they become `error` events.
+* Two manual refreshes, one per provider: the toolbar's *Refresh Claude* (`refreshClaude`)
+  forces a poll of the Claude accounts only; the Codex panel's *Refresh* (`refreshCodex`)
+  re-fetches the Codex snapshot only, ignoring its back-off, and rejects with `usage.error`
+  when the fetch fails (the state is pushed first, so the panel keeps the stale numbers).
+  Codex snapshots are serialized: a manual refresh joins one a poll already started, and a
+  scheduled poll that joins a Claude-only refresh runs the Codex part after it.
 * Before polling, the live Keychain credential is matched to a stored account by fingerprint,
   or by `activeId` when `~/.claude.json` still names that account's email (Claude Code rotated
   the refresh token). A login that matches neither is *foreign*: `activeId` is cleared, an

@@ -5,7 +5,7 @@
  * because the contract promises it is user-safe.
  */
 import { useCallback, useMemo, useRef, useState } from 'react'
-import type { Account, Settings } from '@shared/types'
+import type { Account, AppState, CodexState, Settings } from '@shared/types'
 import { getApi } from '../api'
 import { displayName } from '../lib/format'
 import { useToasts } from './useToasts'
@@ -13,9 +13,12 @@ import { useToasts } from './useToasts'
 export type ActionKey = string
 
 export interface Actions {
-  /** Ids of actions currently in flight, e.g. `switch:acc_2`, `refresh`. */
+  /** Ids of actions currently in flight, e.g. `switch:acc_2`, `refresh`, `refresh:codex`. */
   busy: ReadonlySet<ActionKey>
+  /** The Claude accounts only. */
   refresh: () => Promise<void>
+  /** The Codex snapshot only. */
+  refreshCodex: () => Promise<void>
   switchTo: (account: Account) => Promise<void>
   captureActive: () => Promise<void>
   setDisabled: (account: Account, disabled: boolean) => Promise<void>
@@ -66,6 +69,7 @@ export function useActions(): Actions {
           const n = (s as { accounts: Account[] }).accounts.filter((a) => !a.disabled).length
           return n === 1 ? 'Refreshed 1 account' : `Refreshed ${n} accounts`
         }),
+      refreshCodex: () => run('refresh:codex', () => api.refreshCodex(), (s) => codexRefreshMessage((s as AppState).codex)),
       switchTo: (a) => run(`switch:${a.id}`, () => api.switchTo(a.id), `Switched to ${displayName(a)}`),
       captureActive: () =>
         run('capture', () => api.captureActive(), (s) => {
@@ -90,6 +94,13 @@ export function useActions(): Actions {
       uninstallFeed: () => run('feed', () => api.uninstallFeed(), 'Status line feed removed'),
     }
   }, [busy, run])
+}
+
+/** What a manual Codex refresh found. A failed fetch rejects instead and is toasted as an error. */
+export function codexRefreshMessage(codex: CodexState): string {
+  if (!codex.configured) return 'Codex isn\u2019t logged in'
+  if (codex.mode === 'apikey') return 'Codex is using an API key; there is no quota to fetch'
+  return 'Refreshed Codex'
 }
 
 export function errorMessage(err: unknown): string {
