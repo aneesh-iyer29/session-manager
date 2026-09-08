@@ -3,6 +3,15 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [Unreleased]
+
+### Added
+
+- The Codex panel has its own *Refresh*, with the time since the last fetch beside it, so
+  the Codex quota can be brought up to date on the spot and a fresh `codex login` picked
+  up without waiting for the next poll. The toolbar button is now *Refresh Claude* and
+  polls only the Claude accounts. The two never fetch Codex twice at once.
+
 ## [0.4.0] - 2026-09-04
 
 ### Added

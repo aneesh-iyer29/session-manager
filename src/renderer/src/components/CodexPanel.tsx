@@ -1,8 +1,9 @@
 import type { CodexState, Settings } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatPlan } from '../lib/format'
+import { formatAgo, formatPlan } from '../lib/format'
 import { Button } from './Button'
 import { MeterRow } from './Meter'
+import { RefreshButton } from './RefreshButton'
 
 interface Props {
   codex: CodexState
@@ -11,19 +12,34 @@ interface Props {
   actions: Actions
 }
 
-/** Read-only quota for the one Codex login. Nothing here switches anything. */
+/**
+ * Read-only quota for the one Codex login. Nothing here switches anything.
+ * The header's Refresh re-fetches only Codex, so after `codex login` the new
+ * account shows up without waiting for the next poll; the toolbar's Refresh
+ * leaves Codex alone.
+ */
 export function CodexPanel({ codex, settings, now, actions }: Props) {
+  const refreshing = actions.busy.has('refresh:codex')
+  const fetchedAt = codex.usage?.fetchedAt ?? null
   return (
     <section className="section" aria-label="Codex">
       <div className="section__head">
         <span className="eyebrow">Codex</span>
-        <Button
-          variant="quiet"
-          size="sm"
-          onClick={() => actions.updateSettings({ codexEnabled: !settings.codexEnabled }, settings.codexEnabled ? 'Codex hidden' : 'Codex shown')}
-        >
-          {settings.codexEnabled ? 'Hide' : 'Show'}
-        </Button>
+        <div className="section__actions">
+          {settings.codexEnabled ? (
+            <>
+              {fetchedAt ? <span className="section__age">{formatAgo(fetchedAt, now)}</span> : null}
+              <RefreshButton variant="quiet" spinning={refreshing} onClick={() => actions.refreshCodex()} label="Refresh" ariaLabel="Refresh Codex usage" />
+            </>
+          ) : null}
+          <Button
+            variant="quiet"
+            size="sm"
+            onClick={() => actions.updateSettings({ codexEnabled: !settings.codexEnabled }, settings.codexEnabled ? 'Codex hidden' : 'Codex shown')}
+          >
+            {settings.codexEnabled ? 'Hide' : 'Show'}
+          </Button>
+        </div>
       </div>
       <div className="card">
         <CodexBody codex={codex} enabled={settings.codexEnabled} now={now} />

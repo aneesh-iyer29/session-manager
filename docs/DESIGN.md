@@ -73,9 +73,9 @@ Spacing: 4-pt grid. Card padding 16 (hero 18, with 24 on the ruled side), gaps 1
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
-│ ●●●   Session Manager (Lora)      [AUTO-SWAP ARMED]  12 s ago  [↻ REFRESH]│  toolbar, 1px rule
+│ ●●●   Session Manager (Lora) [AUTO-SWAP ARMED] 12 s ago [↻ REFRESH CLAUDE]│  toolbar, 1px rule
 ├──────────────────────────────────────┬───────────────────────────────────┤
-│ ACTIVE ───────────────────────────── │ CODEX ─────────────────────── HIDE│
+│ ACTIVE ───────────────────────────── │ CODEX ─── 3 min ago ↻ REFRESH HIDE│
 │ ┃ work  work@acme.dev   MAX  [ACTIVE]│ │ PRO · me@…   5-hour ▓▓▓░ 41%  │ │
 │ ┃  37%  HEADROOM                     │ │              Weekly ▓▓▓▓▓░ 71%│ │
 │ ┃  Fable weekly · resets in 2d 3h    │ AUTO-SWAP ─────────────────────── │

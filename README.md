@@ -55,8 +55,9 @@ Whichever account matches the live Keychain credential is marked **active**.
   countdown under it and the other windows as smaller meters.
 - **Standby cards** — every other account with the same gauge at a smaller scale, a
   *Switch* button, and controls to hold it out of rotation, rename it, or remove it.
-- **Codex** — the Codex CLI account's 5-hour and weekly windows. In API-key mode there is
-  no usage endpoint, so the panel only says the CLI is configured.
+- **Codex** — the Codex CLI account's 5-hour and weekly windows, with its own *Refresh* in
+  the panel header (the toolbar's *Refresh Claude* polls only the Claude accounts). In
+  API-key mode there is no usage endpoint, so the panel only says the CLI is configured.
 - **Auto-swap** — arm/disarm, threshold, margin, cooldown, strategy, dry run, and the last
   decision the policy made.
 - **Activity** — switches, auto-swap decisions, logins, and errors, newest first.

@@ -9,6 +9,7 @@ import type { AppState, LoginStatus, Settings } from './types'
 export const IPC = {
   getState: 'swapper:getState',
   refresh: 'swapper:refresh',
+  refreshCodex: 'swapper:refreshCodex',
   switchTo: 'swapper:switchTo',
   captureActive: 'swapper:captureActive',
   startLogin: 'swapper:startLogin',
@@ -30,8 +31,10 @@ export const IPC = {
 
 export interface SwapperApi {
   getState(): Promise<AppState>
-  /** Force a usage poll of every account and Codex now. */
+  /** Force a usage poll of every Claude account now. Codex is left alone; it has `refreshCodex`. */
   refresh(): Promise<AppState>
+  /** Re-fetch the Codex snapshot now, ignoring its back-off. Rejects with the fetch error when the usage call fails. */
+  refreshCodex(): Promise<AppState>
   switchTo(accountId: string): Promise<AppState>
   /** Add or update an account from the credential Claude Code is currently logged in with. */
   captureActive(): Promise<AppState>

@@ -124,7 +124,6 @@ export function createMockApi(): SwapperApi {
                 }
               : a,
           )
-          codex = seedCodex(now)
           lastPollAt = now.toISOString()
           inFlight = false
           const active = accounts.find((a) => a.id === activeId)
@@ -140,6 +139,13 @@ export function createMockApi(): SwapperApi {
         }, 700)
       })
     },
+
+    refreshCodex: () =>
+      later(() => {
+        codex = seedCodex(new Date())
+        log('info', 'Refreshed Codex')
+        return push()
+      }),
 
     switchTo: (id) =>
       later(() => {

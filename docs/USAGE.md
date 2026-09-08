@@ -96,7 +96,10 @@ hook works in every Claude Code session on the machine.
 ## Codex panel
 
 Shows the Codex CLI's account when `~/.codex/auth.json` has a ChatGPT login: plan, email,
-5-hour and weekly windows. The app refreshes the CLI's token when it is within 30 minutes
+5-hour and weekly windows. **Refresh** in the panel header re-fetches the Codex quota on the
+spot, ignoring the 5-minute hold after a failure, with the time since the last fetch beside
+it; the toolbar's **Refresh Claude** leaves Codex alone. After `codex login`, press it to pick
+the new login up without waiting for the next poll. The app refreshes the CLI's token when it is within 30 minutes
 of expiring and writes it back. In API-key mode the CLI has no quota endpoint, so the
 panel only reports that it is configured. *Hide* in the panel header turns it off (*Show* brings it back).
 

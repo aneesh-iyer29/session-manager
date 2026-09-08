@@ -11,6 +11,7 @@ import type { AppState, Settings } from '../shared/types'
 const api: SwapperApi = {
   getState: () => ipcRenderer.invoke(IPC.getState),
   refresh: () => ipcRenderer.invoke(IPC.refresh),
+  refreshCodex: () => ipcRenderer.invoke(IPC.refreshCodex),
   switchTo: (accountId: string) => ipcRenderer.invoke(IPC.switchTo, accountId),
   captureActive: () => ipcRenderer.invoke(IPC.captureActive),
   startLogin: () => ipcRenderer.invoke(IPC.startLogin),

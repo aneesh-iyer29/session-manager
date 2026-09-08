@@ -201,6 +201,9 @@ export class Daemon {
   private timer: NodeJS.Timeout | null = null
   private running = false
   private inFlight: Promise<void> | null = null
+  /** Whether the poll in flight covers Codex; a joining caller that needs it runs that part after. */
+  private inFlightCodex = false
+  private codexInFlight: Promise<void> | null = null
   private lastPollAt: Date | null = null
   private nextPollAt: Date | null = null
   /** Per-account: when usage was last attempted, and until when a 429 holds us off. */
@@ -364,15 +367,40 @@ export class Daemon {
 
   // ----- polling -----
 
+  /** Everything the scheduled poll does, now: every Claude account, Codex, then the swap policy. */
   async refresh(force = true): Promise<AppState> {
     await this.poll(force)
     return this.getState()
   }
 
+  /** The toolbar button: the Claude accounts only. Codex has its own button and `refreshCodex`. */
+  async refreshClaude(): Promise<AppState> {
+    await this.poll(true, false)
+    return this.getState()
+  }
+
+  /**
+   * The Codex panel button: the Codex snapshot only, ignoring its back-off.
+   * The state is updated and pushed before a failed fetch is thrown, so the
+   * panel shows the stale numbers and the caller can toast the reason
+   * (`usage.error` is user-safe by contract).
+   */
+  async refreshCodex(): Promise<AppState> {
+    await this.codexPoll(true)
+    this.emit()
+    const usage = this.codexState.usage
+    if (usage && !usage.ok) throw new Error(usage.error ?? 'Codex usage could not be fetched')
+    return this.getState()
+  }
+
   /** Serialized: a second caller waits for the poll already in flight instead of starting another. */
-  private poll(force: boolean): Promise<void> {
-    if (this.inFlight) return this.inFlight
-    this.inFlight = this.pollOnce(force).finally(() => {
+  private poll(force: boolean, includeCodex = true): Promise<void> {
+    if (this.inFlight) {
+      const joined = this.inFlight
+      return includeCodex && !this.inFlightCodex ? joined.then(() => this.codexPoll(force)) : joined
+    }
+    this.inFlightCodex = includeCodex
+    this.inFlight = this.pollOnce(force, includeCodex).finally(() => {
       this.inFlight = null
       this.emit()
     })
@@ -381,7 +409,7 @@ export class Daemon {
   }
 
   /** Never rejects: every phase is guarded, and so is the bookkeeping around them. */
-  private async pollOnce(force: boolean): Promise<void> {
+  private async pollOnce(force: boolean, includeCodex: boolean): Promise<void> {
     try {
       const settings = this.settings()
       const now = this.now()
@@ -399,7 +427,7 @@ export class Daemon {
         this.lastAttempt.set(acc.id, now.getTime())
         await this.guard(`refresh ${acc.email}`, () => this.refreshAccount(acc, settings))
       }
-      await this.guard('codex', () => this.refreshCodex(settings, force))
+      if (includeCodex) await this.codexPoll(force)
       if (settings.autoswapEnabled) await this.guard('autoswap', () => this.runAutoswap(settings))
       await this.guard('nudge', async () => this.updateNudge(settings))
       this.lastPollAt = now
@@ -568,7 +596,16 @@ export class Daemon {
     this.store.upsertAccount({ ...acc, tokenStatus: status, plan })
   }
 
-  private async refreshCodex(settings: Settings, force: boolean): Promise<void> {
+  /** One Codex snapshot at a time: a manual refresh joins the one a poll already started rather than doubling the call. */
+  private codexPoll(force: boolean): Promise<void> {
+    if (this.codexInFlight) return this.codexInFlight
+    this.codexInFlight = this.guard('codex', () => this.pollCodex(this.settings(), force)).finally(() => {
+      this.codexInFlight = null
+    })
+    return this.codexInFlight
+  }
+
+  private async pollCodex(settings: Settings, force: boolean): Promise<void> {
     if (!settings.codexEnabled) {
       this.codexState = EMPTY_CODEX
       return

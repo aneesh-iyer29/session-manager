@@ -1,7 +1,7 @@
 import type { AppState } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
 import { formatAgo } from '../lib/format'
-import { Button } from './Button'
+import { RefreshButton } from './RefreshButton'
 
 interface Props {
   state: AppState
@@ -18,7 +18,8 @@ export function armedState(settings: AppState['settings']): ArmedState {
 
 /**
  * Translucent title strip under the hidden macOS title bar. The whole strip
- * drags the window; the controls opt out so clicks reach them.
+ * drags the window; the controls opt out so clicks reach them. Its Refresh
+ * covers the Claude accounts only; the Codex panel carries its own.
  */
 export function Toolbar({ state, now, actions }: Props) {
   const armed = armedState(state.settings)
@@ -31,24 +32,7 @@ export function Toolbar({ state, now, actions }: Props) {
         <span className="toolbar__age" aria-live="polite">
           {formatAgo(state.polling.lastPollAt, now)}
         </span>
-        <Button size="sm" onClick={() => actions.refresh()} disabled={refreshing} aria-label="Refresh usage">
-          <svg
-            className={`btn__glyph${refreshing ? ' btn__glyph--spin' : ''}`}
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
-            <path d="M21 3v6h-6" />
-          </svg>
-          Refresh
-        </Button>
+        <RefreshButton spinning={refreshing} onClick={() => actions.refresh()} label="Refresh Claude" ariaLabel="Refresh Claude usage" />
       </div>
     </header>
   )
