@@ -12,6 +12,11 @@ All notable changes to Session Manager are recorded here. The format follows
   up without waiting for the next poll. The toolbar button is now *Refresh Claude* and
   polls only the Claude accounts. The two never fetch Codex twice at once.
 
+### Fixed
+
+- Codex windows are labelled by their length rather than their slot, so a weekly window the
+  API returns as `primary_window` no longer shows as a 5-hour limit resetting in six days.
+
 ## [0.4.0] - 2026-09-04
 
 ### Added

@@ -111,8 +111,9 @@ Codex usage response: `{"plan_type": "pro", "rate_limit": {"primary_window": {"u
 ## Normalized usage model
 
 See `Usage` / `UsageWindow` in `src/shared/types.ts`. Window keys: `five_hour`, `seven_day`,
-`model:<display_name lowercased>` for Claude; `five_hour`, `seven_day` for Codex (primary =
-5h, secondary = weekly).
+`model:<display_name lowercased>` for Claude; `five_hour`, `seven_day` for Codex, told apart by
+`limit_window_seconds` (else by slot, unless the reset lies beyond the slot's span: the API has
+returned the weekly window as `primary_window`); other lengths become `window:<n>h` / `window:<n>d`.
 
 ## Swap policy (`src/main/autoswap.ts`)
 
