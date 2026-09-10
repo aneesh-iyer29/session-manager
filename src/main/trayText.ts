@@ -120,22 +120,24 @@ function agoShort(iso: string, now: Date): string {
 /** The whole glance menu as rows, in display order. */
 export function menuRows(state: AppState, now: Date): MenuRow[] {
   const rows: MenuRow[] = []
-  const threshold = state.settings.threshold
+  const s = state.settings
+  /** Each window is coloured against its own swap line: the session's, or the weekly one. */
+  const line = (key: string): number => (key === 'five_hour' ? s.fiveHourThreshold : s.threshold)
   if (state.accounts.length === 0) rows.push({ kind: 'status', text: 'No accounts yet · open Session Manager to add one' })
   for (const acc of state.accounts) {
     rows.push({ kind: 'header', title: shortName(acc), right: accountRight(acc) })
     const windows = orderedWindows(acc)
     if (windows.length === 0) rows.push({ kind: 'status', text: acc.usage?.error ?? 'Usage not fetched yet' })
     for (const w of windows) {
-      rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold), estimated: w.estimated === true })
+      rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, line(w.key)), estimated: w.estimated === true })
     }
   }
-  if (state.settings.codexEnabled) {
+  if (s.codexEnabled) {
     const h = codexHeader(state.codex)
     rows.push({ kind: 'header', title: h.title, right: h.right })
     if (state.codex.usage) {
       for (const w of orderedWindows({ usage: state.codex.usage })) {
-        rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, threshold), estimated: w.estimated === true })
+        rows.push({ kind: 'window', label: windowTitle(w), right: resetText(w.resetsAt, now), pct: w.pct, tone: tone(w.pct, line(w.key)), estimated: w.estimated === true })
       }
     }
   }

@@ -29,9 +29,9 @@ throttles you, and when it resets. Meters show *used* percent (what the API repo
 numbers people scan say *headroom* and *resets in 2h 14m*.
 
 **Signature element: the binding-window gauge.** The active account is the hero. Its card shows
-one large monospaced number, the headroom of its *binding window* (the most constrained of
-5-hour / Weekly / Fable weekly), with the window name and reset countdown under it, and the other
-two windows as quiet secondary meters. The hero card carries the brand's chamfered gold rule down
+one large monospaced number, the headroom of its *binding window* (the 5-hour session, or a
+weekly window once it is past the warn line and tighter than the session), with the window name
+and reset countdown under it, and the other two windows as quiet secondary meters. The hero card carries the brand's chamfered gold rule down
 its left edge. Every other account repeats the same gauge at a smaller scale. When a swap
 happens, the new active card rises to the hero slot with a critically damped layout spring; this
 is the one orchestrated moment in the app.

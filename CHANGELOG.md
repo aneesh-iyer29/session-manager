@@ -7,13 +7,37 @@ All notable changes to Session Manager are recorded here. The format follows
 
 ### Added
 
+- A separate swap line for the 5-hour session (**5-hour swap at**, default 90) beside the
+  weekly one (**Weekly swap at**, the setting formerly called *Threshold*). One heavy turn can
+  move a session several points, so the session keeps a buffer while the weeks can be run
+  nearly dry. New setting `fiveHourThreshold`.
 - The Codex panel has its own *Refresh*, with the time since the last fetch beside it, so
   the Codex quota can be brought up to date on the spot and a fresh `codex login` picked
   up without waiting for the next poll. The toolbar button is now *Refresh Claude* and
   polls only the Claude accounts. The two never fetch Codex twice at once.
 
+### Changed
+
+- Headroom is session-first. An account's gauge shows its 5-hour session, and a weekly window
+  (all models or Fable) takes over only once it is past the warn line and closer to its limit
+  than the session, the point at which the week runs out before the session does. Before, the
+  highest of the three windows always headed the gauge, which on a Max account is the Fable
+  weekly for most of the week even with a session about to run out.
+- Swap targets are compared on the axis that ran out: session headroom when the 5-hour line
+  hit, weekly headroom when a weekly line did; ties break on the other axis. `consume_first`
+  judges its margin on weekly headroom. Every window is coloured and swapped against its own
+  line, in the cards and in the menu bar.
+- The compact nudge and the fast poll cadence follow the window nearest its swap line rather
+  than the highest window.
+
 ### Fixed
 
+- While the status line feed is fresh, the Fable window is polled every 5 minutes instead of
+  30 once it is within 10 points of its swap line, so a swap on that window is never decided
+  on a projection alone.
+- After a swap, status line documents still carrying the previous login's windows (a Claude
+  Code session finishing its turn) are recognised by their weekly reset and ignored, instead
+  of landing on the new account and prompting a second swap.
 - Codex windows are labelled by their length rather than their slot, so a weekly window the
   API returns as `primary_window` no longer shows as a 5-hour limit resetting in six days.
 

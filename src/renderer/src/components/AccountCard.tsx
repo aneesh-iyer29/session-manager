@@ -1,7 +1,7 @@
 import { motion } from 'motion/react'
 import type { Account, Settings } from '@shared/types'
 import type { Actions } from '../hooks/useActions'
-import { formatClock, formatPlan, secondaryWindows } from '../lib/format'
+import { formatClock, formatPlan, secondaryWindows, swapLineFor } from '../lib/format'
 import { spring } from '../lib/motion'
 import { Button } from './Button'
 import { Gauge } from './Gauge'
@@ -47,12 +47,12 @@ export function AccountCard({ account, settings, now, actions }: Props) {
         {account.email}
       </div>
 
-      <Gauge account={account} now={now} threshold={settings.threshold} />
+      <Gauge account={account} now={now} settings={settings} />
 
       {secondary.length > 0 ? (
         <div className="meter-list meter-list--compact">
           {secondary.map((w) => (
-            <MeterRow key={w.key} window={w} now={now} threshold={settings.threshold} />
+            <MeterRow key={w.key} window={w} now={now} threshold={swapLineFor(w.key, settings)} />
           ))}
         </div>
       ) : null}

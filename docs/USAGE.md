@@ -16,11 +16,13 @@ Sign out of claude.ai in the browser between logins if you want to add a differe
 
 ## Reading a card
 
-Each card shows the account's **headroom**: `100 − max(used %)` across its gating windows,
-which are the 5-hour window, the weekly window, and the Fable weekly window when the API
-reports one. The window with the least headroom is the **binding window**; its name and
-reset countdown sit under the number. Colours: green at 30+ headroom, orange at 11–29, red
-at 10 or below (or at/over your threshold).
+Each card shows the account's **headroom**: `100 − used %` of its **binding window**, whose
+name and reset countdown sit under the number. The binding window is the 5-hour session, the
+window that throttles the session you are working in. A weekly window (all models, or Fable)
+takes over only once it is past the warn line *and* closer to its limit than the session is:
+that is when the week will run out before the session does. The other gating windows are the
+smaller meters beneath. Colours: green at 30+ headroom, orange at 11–29, red at 10 or below
+(or at/over that window's swap line).
 
 States a card can be in:
 
@@ -43,12 +45,14 @@ the new login on their next request.
 Arm it in the Auto-swap panel or from the menu bar. Each poll the policy runs:
 
 1. Accounts that are held or have unknown usage are never targets.
-2. The active account is *near limit* when any gating window used % ≥ **threshold**.
+2. The active account is *near limit* when its 5-hour session is at or past **5-hour swap
+   at**, or a weekly window is at or past **Weekly swap at**.
 3. `best`: stay unless near limit. `consume_first`: prefer the account whose weekly window
-   resets soonest, if its headroom beats the active account's by ≥ **margin** and it is
-   under threshold.
-4. Near limit: switch to the account with the most headroom that is under threshold and
-   beats the active account by ≥ margin. None → *blocked*.
+   resets soonest, if its weekly headroom beats the active account's by ≥ **margin** and it
+   is under every line.
+4. Near limit: switch to the account with the most headroom on the axis that hit (session
+   headroom for the session, weekly headroom for a weekly window) that is under every line
+   itself and beats the active account by ≥ margin on that axis. None → *blocked*.
 5. No automatic switch within **cooldown** seconds of the last one.
 6. **Dry run** turns a switch into a logged *stay* prefixed `dry-run:`.
 
@@ -57,8 +61,8 @@ fires on each automatic switch (turn off with *Notifications*).
 
 Poll interval is 5 min by default (minimum 15 s). Anthropic's usage endpoint allows only
 about 30 requests per hour per account, shared with Claude Code's own checks, so the active
-account is fetched at most every 5 min and standby accounts every 10 min unless within 10
-points of the threshold. Accounts fetched within those gaps are
+account is fetched at most every 5 min and standby accounts every 10 min unless one of their
+windows is within 10 points of its swap line. Accounts fetched within those gaps are
 skipped unless you press Refresh.
 
 ## Live usage from Claude Code
@@ -66,11 +70,17 @@ skipped unless you press Refresh.
 Claude Code already knows your 5-hour and weekly usage from every response it gets. Click
 **Install** on "Claude Code status line feed" in the Auto-swap panel and it hands those
 numbers to Session Manager on every assistant message, so the active account updates
-live and the app polls Anthropic only for the Fable window (every 30 min). Between those
+live and the app polls Anthropic only for the Fable window (every 30 min, or every 5 once
+it is within 10 points of its swap line). Between those
 polls the Fable window is projected from the live weekly number, two Fable points per weekly
 point, anchored at the last real reading, and shown with a ≈ mark. If you already
 have a status line, it keeps running underneath ours; Remove restores it. Standby accounts
 are still polled, since Claude Code only knows about the account it is logged in with.
+
+After a swap, a Claude Code session still finishing a turn on the previous login keeps
+reporting that login's numbers for a moment. Those are recognised by their weekly reset time
+and ignored, so the new account is never shown (or swapped) as if it were the old one;
+Activity notes it once.
 
 ## Compact nudge
 
@@ -81,7 +91,7 @@ gets you to `/compact` first.
 1. In the Auto-swap panel, click **Install** on "Claude Code compact nudge". This writes
    `~/.claude/hooks/session-manager-nudge.sh` and registers it as a `UserPromptSubmit` hook in
    `~/.claude/settings.json`. Nothing else in that file is touched; **Remove** takes it back out.
-2. Set **Warn at (%)**, default 80. When the active account's worst gating window reaches it
+2. Set **Warn at (%)**, default 80. When the active account's gating window nearest its swap line reaches it
    (and auto-swap is armed, not in dry run), the hero card shows a "Swap soon" notice and the
    app raises a flag file the hook reads.
 3. Pick the **Nudge** behaviour. *Block once* (default): the next message you send in
@@ -120,8 +130,9 @@ window hides it; quit from the menu or ⌘Q.
 | --- | --- | --- |
 | Auto-swap | off | Run the policy each poll. |
 | Dry run | off | Log decisions without switching. |
-| Threshold | 50–100, 90 | Near-limit percent. |
-| Margin | 0–50, 10 | Required headroom advantage of a target. |
+| 5-hour swap at | 50–100, 90 | The 5-hour session's swap line. |
+| Weekly swap at | 50–100, 90 | The weekly and Fable weekly windows' swap line. |
+| Margin | 0–50, 10 | Required headroom advantage of a target, on the axis that hit. |
 | Cooldown | ≥ 0, 300 s | Minimum gap between automatic switches. |
 | Poll interval | ≥ 15, 300 s | How often the loop runs; each account is fetched at most every 5 min (standby: 10). |
 | Strategy | `best` | `best` or `consume_first`. |
@@ -131,7 +142,7 @@ window hides it; quit from the menu or ⌘Q.
 | Launch at login | off | Register as a login item. |
 | Show in Dock | on | Off = menu-bar only. |
 
-| Warn at | 80 | Raise the compact nudge when the active account's worst gating window reaches this |
+| Warn at | 80 | Raise the compact nudge when the active account's window nearest its swap line reaches this; a weekly window past it can take over the gauge from the session |
 | Nudge | Block once | What the Claude Code hook does with the flag |
 
 ## Files

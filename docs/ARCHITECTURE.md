@@ -121,17 +121,32 @@ Pure functions, no I/O, fully unit-tested.
 
 * `gatingWindows(usage, model)` returns the windows that gate an account: `five_hour`,
   `seven_day`, and `model:<model>` if present. `model` defaults to `"Fable"`.
-* `headroom(usage, model)` = `100 - max(pct of gating windows)`; `null` when usage unknown.
+* `options(settings)` picks the `PolicyOptions` the pure functions read: `model`,
+  `fiveHourThreshold`, `threshold`, `warnPct`.
+* `swapLineFor(key, opts)`: `fiveHourThreshold` for `five_hour`, `threshold` for every
+  weekly-scale window. Each window is judged against its own line.
+* `bindingWindow(usage, opts)`: the 5-hour session; a weekly window instead when its pct is
+  ≥ `min(warnPct, threshold)` and higher than the session's (the week runs out before the
+  session does). Without a session window, the highest window.
+  `headroom(usage, opts)` = `100 - pct` of that window; `null` when usage unknown.
+* `sessionHeadroom` / `weeklyHeadroom` / `overallHeadroom(usage, model)`: one axis each
+  (`100 - pct` of the session, of the tightest weekly window, of the highest window).
+* `nearLimit(usage, opts)`: the window at or past its own line, furthest past first, or `null`.
+  `closestToLine(usage, opts)`: the window with the fewest points left before its line.
 * `decide(accounts, settings, now, lastSwitchAt)` returns `Decision`. Rules:
-  1. Ignore disabled accounts and accounts whose usage is unknown as targets.
-  2. Active account is *near limit* when any gating window pct ≥ `threshold`.
-  3. Strategy `best`: if not near limit → stay. Strategy `consume_first`: prefer the enabled
+  1. Ignore disabled accounts, accounts whose usage is unknown, and accounts over any of
+     their own lines as targets.
+  2. Active account is *near limit* when `nearLimit` is non-null.
+  3. The comparison axis is the one that hit: session headroom when `five_hour` did, weekly
+     headroom when a weekly window did (and for `consume_first`, which is about the week).
+     `margin` and the ranking use that axis; ties break on the other axis, then on id.
+  4. Strategy `best`: if not near limit → stay. Strategy `consume_first`: prefer the enabled
      account whose weekly window (`seven_day` or the model window) resets soonest, if its
-     headroom exceeds the active account's by ≥ `margin` and it is below threshold.
-  4. If near limit → pick the enabled, non-active account with the greatest headroom that is
-     below threshold and beats the active account's headroom by ≥ `margin`. None → `blocked`.
-  5. Cooldown: no switch if `now - lastSwitchAt < cooldownSeconds`.
-  6. `dryRun` turns any `switch` into a `stay` with reason prefixed `dry-run:`.
+     weekly headroom exceeds the active account's by ≥ `margin`.
+  5. If near limit → pick the enabled, non-active account with the greatest headroom on the
+     axis that beats the active account's by ≥ `margin`. None → `blocked`.
+  6. Cooldown: no switch if `now - lastSwitchAt < cooldownSeconds`.
+  7. `dryRun` turns any `switch` into a `stay` with reason prefixed `dry-run:`.
 
 ## Switch mechanics (`src/main/switcher.ts`)
 
@@ -162,10 +177,17 @@ credential). Never refresh the *active* account's token; Claude Code owns it.
 ## Daemon (`src/main/daemon.ts`)
 
 * Every `pollIntervalSeconds` (default 300): refresh usage for enabled accounts — the active one
-  if not fetched < 5 min ago, standby ones < 10 min ago unless within 10 points of the threshold
-  (forced polls ignore the gaps; the endpoint allows ~30 requests/hour per token, shared with
-  Claude Code), refresh the Codex snapshot, then if `autoswapEnabled` run
-  `decide` and perform the switch. Errors never kill the loop; they become `error` events.
+  if not fetched < 5 min ago (< 30 min while the status line feed is fresh, unless a window only
+  the endpoint reports is within 10 points of its swap line), standby ones < 10 min ago unless
+  one of their windows is within 10 points of its swap line (forced polls ignore the gaps; the
+  endpoint allows ~30 requests/hour per token, shared with Claude Code), refresh the Codex
+  snapshot, then if `autoswapEnabled` run `decide` and perform the switch. Errors never kill
+  the loop; they become `error` events.
+* The status line feed is attributed before it is merged: each endpoint fetch records the
+  account's weekly reset, and a document whose `seven_day.resets_at` matches (within 15 min) a
+  standby account's reset and not the active one's belongs to that login (a session still
+  finishing a turn after a swap) and is ignored, with one `info` event per document. An
+  unrecognised reset is taken as the active account's (weekly rollover, or nothing fetched yet).
 * Two manual refreshes, one per provider: the toolbar's *Refresh Claude* (`refreshClaude`)
   forces a poll of the Claude accounts only; the Codex panel's *Refresh* (`refreshCodex`)
   re-fetches the Codex snapshot only, ignoring its back-off, and rejects with `usage.error`
@@ -219,9 +241,9 @@ A swap mid-conversation makes the next request re-cache the whole context on the
 Nothing outside Claude Code can trigger `/compact`, but a `UserPromptSubmit` hook can stop a
 prompt with a message or hand Claude context. So:
 
-* After every poll (and every manual switch) the daemon computes the active account's worst
-  gating window. If auto-swap is enabled, not in dry run, and that window is at or past
-  `settings.warnPct`, it writes `<dataDir>/swap-pending.txt` (line 1 episode id, line 2
+* After every poll (and every manual switch) the daemon computes the active account's gating
+  window nearest its swap line (`closestToLine`). If auto-swap is enabled, not in dry run, and
+  that window is at or past `settings.warnPct`, it writes `<dataDir>/swap-pending.txt` (line 1 episode id, line 2
   `nudgeMode`, rest message) plus a JSON twin for the UI. Otherwise it removes both. The id is
   `accountId:windowKey:resetsAt`, stable for one approach to the line.
 * `installHook()` writes `~/.claude/hooks/session-manager-nudge.sh` (0755) and registers it

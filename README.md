@@ -2,15 +2,16 @@
 
 A macOS menu bar app for people who run several Claude Code accounts. It watches the
 usage limits of every account, shows how much runway each one has left, and swaps the
-active login before the Fable weekly window (or the 5-hour / weekly window) throttles you.
+active login before the 5-hour session (or the weekly / Fable weekly window) throttles you.
 One Codex account's quota is shown alongside, read-only.
 
 - **Many Claude accounts, one dashboard.** Capture the account Claude Code is logged in
   with, or add more through a browser login. Each account gets a gauge showing its
   headroom and when its binding window resets.
-- **Fable-gated auto-swap.** When the active account's 5-hour, weekly, or Fable weekly
-  window reaches your threshold, the app switches Claude Code to the account with the most
-  headroom. Cooldown, margin, and a dry-run mode keep it from flapping.
+- **Session-first auto-swap.** When the active account's 5-hour session reaches its swap
+  line, or its weekly or Fable weekly window reaches theirs, the app switches Claude Code to
+  the account with the most headroom on the axis that ran out. Cooldown, margin, and a
+  dry-run mode keep it from flapping.
 - **One Codex account, read-only.** If the Codex CLI is logged in with ChatGPT, its 5-hour
   and weekly windows appear in the sidebar.
 - **Menu bar first.** The tray title reads `work 63%` (alias and binding-window percent);
@@ -51,8 +52,9 @@ Whichever account matches the live Keychain credential is marked **active**.
 ## The dashboard
 
 - **Hero gauge** — the active account. The big number is the headroom of its *binding
-  window* (the most constrained of 5-hour / Weekly / Fable weekly), with the reset
-  countdown under it and the other windows as smaller meters.
+  window*: the 5-hour session, or a weekly window once that is past the warn line and closer
+  to its limit than the session (the week will run out before the session does). The reset
+  countdown sits under it and the other windows are smaller meters.
 - **Standby cards** — every other account with the same gauge at a smaller scale, a
   *Switch* button, and controls to hold it out of rotation, rename it, or remove it.
 - **Codex** — the Codex CLI account's 5-hour and weekly windows, with its own *Refresh* in
@@ -69,8 +71,9 @@ policy:
 
 | Setting | Meaning |
 | --- | --- |
-| **Threshold** (50–100, default 90) | The active account is *near limit* when any gating window reaches this percent used. |
-| **Margin** (0–50, default 10) | A target must beat the active account's headroom by at least this much. Hysteresis against ping-pong. |
+| **5-hour swap at** (50–100, default 90) | The active account is *near limit* when its 5-hour session reaches this percent used. Keep a real buffer here: one heavy turn can move a session several points. |
+| **Weekly swap at** (50–100, default 90) | The same line for the weekly and Fable weekly windows. These can be run nearly dry. |
+| **Margin** (0–50, default 10) | A target must beat the active account by at least this much on the axis that hit: session headroom when the session did, weekly headroom when a weekly window did. Hysteresis against ping-pong. |
 | **Cooldown** (default 300 s) | Minimum time between automatic switches. |
 | **Strategy** | `best`: only switch when near limit, to the account with the most headroom. `consume_first`: prefer the account whose weekly window resets soonest, so nothing goes unused. |
 | **Fable window** | The per-model weekly window (`model:fable`) counts as a gating window alongside 5-hour and Weekly. The model name is a setting for when the gating model changes. |
@@ -89,7 +92,9 @@ sessions pick up the new login on their next request.
 
 Install the status line feed from the Auto-swap panel and Claude Code hands the app its own
 rate-limit numbers on every message. The active account updates instantly and the usage
-endpoint is only asked about the Fable window, every 30 minutes.
+endpoint is only asked about the Fable window, every 30 minutes, or every 5 once that window
+is within 10 points of its swap line. After a swap, status line data that still carries the
+previous login's numbers is recognised and ignored.
 
 ## Compact before the swap
 

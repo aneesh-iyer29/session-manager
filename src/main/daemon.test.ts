@@ -47,6 +47,8 @@ interface Harness {
   writes: string[]
   /** Fable weekly pct served per access token. */
   fable: Map<string, number>
+  /** Weekly reset served per access token (ISO); the default when unset. */
+  weeklyReset: Map<string, string>
   refreshes: number
   clock: { now: Date }
   codexCalls: number
@@ -54,11 +56,13 @@ interface Harness {
 
 const CODEX: CodexState = { configured: true, mode: 'chatgpt', email: 'me@example.com', plan: 'pro', usage: null }
 
-function usageBody(fablePct: number): unknown {
+const WEEKLY_RESET = '2030-01-07T00:00:00Z'
+
+function usageBody(fablePct: number, weeklyReset = WEEKLY_RESET): unknown {
   return {
     five_hour: { utilization: 10, resets_at: '2030-01-01T05:00:00Z' },
-    seven_day: { utilization: 20, resets_at: '2030-01-07T00:00:00Z' },
-    limits: [{ kind: 'weekly_scoped', percent: fablePct, resets_at: '2030-01-07T00:00:00Z', scope: { model: { display_name: 'Fable' } } }],
+    seven_day: { utilization: 20, resets_at: weeklyReset },
+    limits: [{ kind: 'weekly_scoped', percent: fablePct, resets_at: weeklyReset, scope: { model: { display_name: 'Fable' } } }],
   }
 }
 
@@ -94,6 +98,7 @@ function harness(opts: { autoswap?: boolean; cred2?: string } = {}): Harness {
       ['tok-2', 20],
       ['tok-fresh', 20],
     ]),
+    weeklyReset: new Map(),
     refreshes: 0,
     clock: { now: new Date('2026-06-01T12:00:00Z') },
     codexCalls: 0,
@@ -106,7 +111,7 @@ function harness(opts: { autoswap?: boolean; cred2?: string } = {}): Harness {
     if (url.includes('/api/oauth/usage')) {
       const pct = h.fable.get(token)
       if (pct === undefined) return json({ error: 'unauthorized' }, 401)
-      return json(usageBody(pct))
+      return json(usageBody(pct, h.weeklyReset.get(token)))
     }
     if (url.includes('/v1/oauth/token')) {
       h.refreshes += 1
@@ -160,8 +165,9 @@ describe('polling', () => {
     expect(usage.acc_2?.windows.find((w) => w.key === 'model:fable')?.pct).toBe(20)
     expect(state.accounts.map((a) => a.id)).toEqual(['acc_1', 'acc_2'])
     expect(state.accounts[0]?.active).toBe(true)
-    expect(state.accounts[0]?.headroom).toBe(70)
-    expect(state.accounts[0]?.bindingWindow).toBe('model:fable')
+    // Session-first: 5h 10 / weekly 20 / Fable 30 binds on the session (the Fable window is under the warn line).
+    expect(state.accounts[0]?.headroom).toBe(90)
+    expect(state.accounts[0]?.bindingWindow).toBe('five_hour')
     expect(state.codex.mode).toBe('chatgpt')
     expect(state.polling.lastPollAt).not.toBeNull()
     expect(h.codexCalls).toBe(1)
@@ -618,5 +624,124 @@ describe('settings', () => {
     expect(() => h.daemon.updateSettings({ bogus: 1 } as Partial<import('../shared/types').Settings>)).toThrow(/unknown setting/)
     // Nothing from the failed patches leaked into the store.
     expect(h.store.loadSettings().threshold).toBe(85)
+  })
+})
+
+const epoch = (iso: string): number => Date.parse(iso) / 1000
+const tick = (): Promise<void> => new Promise((r) => setTimeout(r, 5))
+
+describe('status line feed after a swap', () => {
+  it('ignores a status line still carrying the previous login’s windows, then adopts the new login’s', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    const RESET_2 = '2030-01-05T00:00:00Z'
+    h.weeklyReset.set('tok-2', RESET_2)
+    const feed = (five: number, weeklyReset: string) =>
+      writeFileSync(
+        join(home, 'statusline.json'),
+        JSON.stringify({ rate_limits: { five_hour: { used_percentage: five, resets_at: 1893456000 }, seven_day: { used_percentage: 20, resets_at: epoch(weeklyReset) } } }),
+      )
+    await h.daemon.refresh() // endpoint: acc_1 resets at WEEKLY_RESET, acc_2 at RESET_2
+    feed(95, WEEKLY_RESET)
+    let state = await h.daemon.refresh(false)
+    const five = (s: typeof state, id: string) => s.accounts.find((a) => a.id === id)!.usage!.windows.find((w) => w.key === 'five_hour')!
+    expect(five(state, 'acc_1').pct).toBe(95)
+
+    await h.daemon.switchTo('acc_2')
+    await tick()
+    feed(96, WEEKLY_RESET) // a session finishing its turn on the old login
+    state = await h.daemon.refresh(false)
+    expect(state.activeId).toBe('acc_2')
+    expect(five(state, 'acc_2').pct).toBe(10) // the endpoint's number, not the old login's
+    expect(state.events.some((e) => e.message.includes('previous login'))).toBe(true)
+
+    await tick()
+    feed(3, RESET_2) // the new login's first response
+    state = await h.daemon.refresh(false)
+    expect(five(state, 'acc_2').pct).toBe(3)
+  })
+
+  it('takes an unrecognised weekly reset as the active account’s (weekly rollover)', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    await h.daemon.refresh()
+    await tick()
+    writeFileSync(
+      join(home, 'statusline.json'),
+      JSON.stringify({ rate_limits: { five_hour: { used_percentage: 42, resets_at: 1893456000 }, seven_day: { used_percentage: 1, resets_at: epoch('2030-01-14T00:00:00Z') } } }),
+    )
+    const state = await h.daemon.refresh(false)
+    expect(state.accounts.find((a) => a.id === 'acc_1')!.usage!.windows.find((w) => w.key === 'five_hour')!.pct).toBe(42)
+  })
+})
+
+describe('poll cadence near the line', () => {
+  const feedAt = (home: string, weekly: number) =>
+    writeFileSync(join(home, 'statusline.json'), JSON.stringify({ rate_limits: { five_hour: { used_percentage: 50, resets_at: 1893456000 }, seven_day: { used_percentage: weekly, resets_at: epoch(WEEKLY_RESET) } } }))
+
+  it('keeps the active account on the half-hour endpoint cadence while the Fable window is far from its line', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    feedAt(home, 20)
+    await h.daemon.refresh() // endpoint: fable 30
+    h.fable.set('tok-1', 60)
+    h.clock.now = new Date('2026-06-01T12:06:00Z')
+    await tick()
+    feedAt(home, 21)
+    const fable = (await h.daemon.refresh(false)).accounts.find((a) => a.id === 'acc_1')!.usage!.windows.find((w) => w.key === 'model:fable')!
+    expect(fable.estimated).toBe(true) // still the projection: no endpoint call
+    expect(fable.pct).toBe(32)
+  })
+
+  it('polls the endpoint every five minutes once the Fable window is within ten points of its line', async () => {
+    const h = harness()
+    const home = process.env.SESSION_MANAGER_HOME as string
+    h.fable.set('tok-1', 85)
+    feedAt(home, 20)
+    await h.daemon.refresh() // endpoint: fable 85 → 5 points from the default line of 90
+    h.clock.now = new Date('2026-06-01T12:06:00Z')
+    await h.daemon.refresh(false) // fast cadence: fetched again after five minutes
+    h.fable.set('tok-1', 95)
+    h.clock.now = new Date('2026-06-01T12:12:00Z')
+    await tick()
+    feedAt(home, 21)
+    const fable = (await h.daemon.refresh(false)).accounts.find((a) => a.id === 'acc_1')!.usage!.windows.find((w) => w.key === 'model:fable')!
+    expect(fable.pct).toBe(95)
+    expect(fable.estimated).toBeUndefined()
+  })
+})
+
+describe('settings: swap lines', () => {
+  it('accepts a separate 5-hour swap line and rejects one out of range', async () => {
+    const h = harness()
+    expect(h.daemon.updateSettings({ fiveHourThreshold: 85 }).settings.fiveHourThreshold).toBe(85)
+    expect(() => h.daemon.updateSettings({ fiveHourThreshold: 40 })).toThrow(/between 50 and 100/)
+    expect(h.daemon.getState().settings.fiveHourThreshold).toBe(85)
+  })
+
+  it('swaps on the 5-hour line while the weekly line is higher', async () => {
+    const h = harness({ autoswap: true })
+    h.daemon.updateSettings({ fiveHourThreshold: 90, threshold: 98 })
+    const usage = h.store.loadUsage()
+    usage['acc_1'] = {
+      fetchedAt: '2026-06-01T11:59:00Z',
+      ok: true,
+      error: null,
+      plan: 'max',
+      windows: [
+        { key: 'five_hour', label: '5-hour', pct: 91, resetsAt: '2030-01-01T05:00:00Z' },
+        { key: 'seven_day', label: 'Weekly', pct: 40, resetsAt: WEEKLY_RESET },
+      ],
+    }
+    h.store.saveUsage(usage)
+    // Keep the endpoint from overwriting the seeded numbers before the policy runs: the feed is fresh.
+    writeFileSync(
+      join(process.env.SESSION_MANAGER_HOME as string, 'statusline.json'),
+      JSON.stringify({ rate_limits: { five_hour: { used_percentage: 91, resets_at: 1893456000 }, seven_day: { used_percentage: 40, resets_at: epoch(WEEKLY_RESET) } } }),
+    )
+    const state = await h.daemon.refresh()
+    expect(state.activeId).toBe('acc_2')
+    expect(state.autoswap.lastDecision?.action).toBe('switch')
+    expect(state.autoswap.lastDecision?.reason).toContain('five_hour at 91% >= 90%')
   })
 })

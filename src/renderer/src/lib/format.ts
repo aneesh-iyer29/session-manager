@@ -3,7 +3,7 @@
  * they can be unit-tested without a DOM and so every component renders numbers
  * and countdowns the same way (the brief demands consistent "runway" copy).
  */
-import type { Account, Usage, UsageWindow } from '@shared/types'
+import type { Account, Settings, Usage, UsageWindow } from '@shared/types'
 
 export type Bucket = 'ok' | 'warn' | 'danger' | 'unknown'
 
@@ -86,6 +86,14 @@ export function localPart(email: string): string {
 export function displayName(account: Pick<Account, 'alias' | 'email'>): string {
   const alias = account.alias.trim()
   return alias.length > 0 ? alias : localPart(account.email)
+}
+
+/**
+ * The swap line for a window: the 5-hour session has its own, the weekly
+ * windows share `threshold`. Mirrors `autoswap.swapLineFor` in the main process.
+ */
+export function swapLineFor(key: string, settings: Pick<Settings, 'fiveHourThreshold' | 'threshold'>): number {
+  return key === 'five_hour' ? settings.fiveHourThreshold : settings.threshold
 }
 
 /** Resolve the account's binding window from its usage, or null when unknown. */
