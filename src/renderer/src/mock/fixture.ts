@@ -126,6 +126,14 @@ export function seedEvents(now: Date): SwapperEvent[] {
     { id: 'ev_3', at: iso(t - 55 * 60_000), kind: 'switch', message: 'Switched personal → work', accountId: 'acc_1' },
     { id: 'ev_2', at: iso(t - 56 * 60_000), kind: 'autoswap', message: 'Fable weekly at 91% on personal, switching', accountId: 'acc_2' },
     { id: 'ev_1', at: iso(t - 1 * DAY - 2 * HOUR), kind: 'login', message: 'Added alt via browser login', accountId: 'acc_3' },
+    // A run of older polls so the log folds in the browser preview, as it does after a few days of use.
+    ...Array.from({ length: 20 }, (_, i): SwapperEvent => ({
+      id: `ev_old_${i}`,
+      at: iso(t - 2 * DAY - i * 3 * HOUR),
+      kind: i % 7 === 3 ? 'error' : 'info',
+      message: i % 7 === 3 ? 'work: usage fetch failed (HTTP 429), keeping the last numbers' : 'Refreshed 3 accounts',
+      accountId: i % 7 === 3 ? 'acc_1' : null,
+    })),
   ]
 }
 

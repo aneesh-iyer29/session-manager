@@ -62,7 +62,7 @@ Whichever account matches the live Keychain credential is marked **active**.
   API-key mode there is no usage endpoint, so the panel only says the CLI is configured.
 - **Auto-swap** — arm/disarm, threshold, margin, cooldown, strategy, dry run, and the last
   decision the policy made.
-- **Activity** — switches, auto-swap decisions, logins, and errors, newest first.
+- **Activity** — switches, auto-swap decisions, logins, and errors, newest first. The newest twelve show; *Show more* unfolds the rest (up to a hundred).
 
 ## Auto-swap semantics
 
