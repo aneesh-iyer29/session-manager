@@ -18,6 +18,9 @@ All notable changes to Session Manager are recorded here. The format follows
 
 ### Changed
 
+- Activity folds after the newest twelve entries, with *Show N more* / *Show less* under the
+  list. The backend still keeps the last hundred, so nothing is lost; the right column just
+  stops running the height of a hundred log lines.
 - Headroom is session-first. An account's gauge shows its 5-hour session, and a weekly window
   (all models or Fable) takes over only once it is past the warn line and closer to its limit
   than the session, the point at which the week runs out before the session does. Before, the

@@ -783,6 +783,18 @@
   color: var(--danger);
 }
 
+/* The fold: a ruled row under the visible dozen, button flush left with the times. */
+.activity__more {
+  padding-top: 8px;
+  margin-top: 2px;
+  border-top: 1px solid var(--hairline);
+}
+
+.activity__more .btn {
+  /* Cancel the small button's inset so the label sits on the time column. */
+  margin-left: -10px;
+}
+
 /* ---- toasts --------------------------------------------------------- */
 .toast {
   pointer-events: auto;
