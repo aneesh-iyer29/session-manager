@@ -47,7 +47,8 @@ CI runs typecheck, lint, test, and build on Ubuntu; packaging and the smoke laun
    and Electron only.
 7. Keep scope: many Claude accounts, one Codex account, Fable-gated swapping. No i18n,
    no extra themes, no plugins.
-8. Do not run `git` or `npm install` unless the task says so.
+8. Never commit to `main`. Every change goes up on a branch as a pull request whose
+   description says what changed and why; merge once CI is green.
 
 ## Module map (main process)
 

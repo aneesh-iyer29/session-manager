@@ -27,6 +27,8 @@ CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the s
 
 ## Ground rules
 
+- **Everything lands through a pull request**, maintainers' own changes included. Nothing
+  is committed straight to `main`. The PR description says what changed and why.
 - **The contract is `src/shared`.** If a change needs new fields or channels, update
   `types.ts` / `ipc.ts`, the main process, the preload, the renderer, the mock, and
   `docs/ARCHITECTURE.md` in one PR.
