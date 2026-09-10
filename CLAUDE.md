@@ -72,4 +72,5 @@ npm run dist       build + unsigned DMG/zip → dist/ (dist:dir for just the .ap
 - Do not write `~/.claude.json` or the Keychain outside the switcher's lock-protected path.
 - Do not add i18n, themes beyond light/dark, telemetry, plugin systems, or multiple Codex accounts.
 - Do not use `setInterval` for polling; the daemon chains `setTimeout`.
-- Do not run `git` commands or `npm install` unless asked.
+- Do not commit to `main`. Every change, however small, goes up on a branch as a pull
+  request whose description says what changed and why; merge it once CI is green.
