@@ -110,6 +110,7 @@ export function normalizeSettings(input: unknown): Settings {
   return {
     autoswapEnabled: bool(s.autoswapEnabled, d.autoswapEnabled),
     dryRun: bool(s.dryRun, d.dryRun),
+    fiveHourThreshold: clampNumber(s.fiveHourThreshold, d.fiveHourThreshold, 50, 100),
     threshold: clampNumber(s.threshold, d.threshold, 50, 100),
     margin: clampNumber(s.margin, d.margin, 0, 50),
     cooldownSeconds: clampNumber(s.cooldownSeconds, d.cooldownSeconds, 0),

@@ -11,10 +11,11 @@ interface Props {
   actions: Actions
 }
 
-type Draft = Pick<Settings, 'strategy' | 'threshold' | 'margin' | 'cooldownSeconds' | 'pollIntervalSeconds' | 'model' | 'warnPct' | 'nudgeMode'>
+type Draft = Pick<Settings, 'strategy' | 'fiveHourThreshold' | 'threshold' | 'margin' | 'cooldownSeconds' | 'pollIntervalSeconds' | 'model' | 'warnPct' | 'nudgeMode'>
 
 const pick = (s: Settings): Draft => ({
   strategy: s.strategy,
+  fiveHourThreshold: s.fiveHourThreshold,
   threshold: s.threshold,
   margin: s.margin,
   cooldownSeconds: s.cooldownSeconds,
@@ -63,8 +64,8 @@ export function AutoswapPanel({ state, now, actions }: Props) {
 
       <div className="card panel">
         <div className="panel__summary">
-          threshold {settings.threshold} · margin {settings.margin} · cooldown {formatDuration(settings.cooldownSeconds)} · every{' '}
-          {formatDuration(settings.pollIntervalSeconds)}
+          5-hour at {settings.fiveHourThreshold} · weekly at {settings.threshold} · margin {settings.margin} · cooldown{' '}
+          {formatDuration(settings.cooldownSeconds)} · every {formatDuration(settings.pollIntervalSeconds)}
         </div>
         <DecisionLine decision={state.autoswap.lastDecision} state={state} />
 
@@ -102,7 +103,11 @@ export function AutoswapPanel({ state, now, actions }: Props) {
             </select>
           </label>
           <label className="field">
-            <span className="field__label">Threshold (%)</span>
+            <span className="field__label">5-hour swap at (%)</span>
+            <input className="field__input" type="number" min={50} max={100} step={1} value={draft.fiveHourThreshold} onChange={num('fiveHourThreshold', settings.fiveHourThreshold)} />
+          </label>
+          <label className="field">
+            <span className="field__label">Weekly swap at (%)</span>
             <input className="field__input" type="number" min={50} max={100} step={1} value={draft.threshold} onChange={num('threshold', settings.threshold)} />
           </label>
           <label className="field">

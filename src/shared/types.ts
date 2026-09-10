@@ -45,9 +45,15 @@ export interface Account {
   addedAt: string
   tokenStatus: TokenStatus
   usage: Usage | null
-  /** 100 - max(pct of gating windows), or null when usage is unknown. */
+  /**
+   * 100 - pct of the binding window, or null when usage is unknown. The 5-hour
+   * session's headroom unless a weekly window has taken over (see `bindingWindow`).
+   */
   headroom: number | null
-  /** Key of the gating window with the least headroom, or null. */
+  /**
+   * Key of the window the account is up against: the 5-hour session, or a weekly
+   * window that is past the warn line and closer to its limit than the session.
+   */
   bindingWindow: string | null
 }
 
@@ -66,7 +72,9 @@ export type Strategy = 'best' | 'consume_first'
 export interface Settings {
   autoswapEnabled: boolean
   dryRun: boolean
-  /** 50-100. An account is "near limit" when any gating window reaches this. */
+  /** 50-100. The swap line for the 5-hour session: the active account is swapped when its session reaches this. */
+  fiveHourThreshold: number
+  /** 50-100. The swap line for the weekly windows (all models, and the per-model one). */
   threshold: number
   /** 0-50. A switch target must beat the active account's headroom by this much. */
   margin: number
@@ -81,7 +89,11 @@ export interface Settings {
   notify: boolean
   launchAtLogin: boolean
   showInDock: boolean
-  /** 50-100. Below `threshold`. The compact nudge flag is raised when the active account's gating window reaches this. */
+  /**
+   * 50-100. Below the swap lines. The compact nudge flag is raised when a gating window of
+   * the active account reaches this, and a weekly window past it takes over from the
+   * 5-hour session as the binding window.
+   */
   warnPct: number
   /** `block`: the Claude Code hook stops the first prompt after the flag with a message; `context`: it only tells Claude. */
   nudgeMode: NudgeMode
@@ -172,6 +184,7 @@ export interface LoginStatus {
 export const DEFAULT_SETTINGS: Settings = {
   autoswapEnabled: false,
   dryRun: false,
+  fiveHourThreshold: 90,
   threshold: 90,
   margin: 10,
   cooldownSeconds: 300,

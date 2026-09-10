@@ -51,13 +51,14 @@ export function createMockApi(): SwapperApi {
       liveFeed: { installed: feedInstalled, lastAt: feedInstalled ? new Date(Date.now() - 42_000).toISOString() : null },
     })
 
-  /** Mirror the daemon: flag when the active account's worst gating window is at or past warnPct. */
+  /** Mirror the daemon: flag when the active account's window nearest its swap line is at or past warnPct. */
   function pendingNudge(): AppState['nudge']['pending'] {
     if (!settings.autoswapEnabled || settings.dryRun) return null
     const a = accounts.find((x) => x.id === activeId)
     if (!a?.usage) return null
     const gating = a.usage.windows.filter((w) => w.key === 'five_hour' || w.key === 'seven_day' || w.key === `model:${settings.model.toLowerCase()}`)
-    const worst = gating.reduce<(typeof gating)[number] | null>((m, w) => (m == null || w.pct > m.pct ? w : m), null)
+    const line = (key: string): number => (key === 'five_hour' ? settings.fiveHourThreshold : settings.threshold)
+    const worst = gating.reduce<(typeof gating)[number] | null>((m, w) => (m == null || line(w.key) - w.pct < line(m.key) - m.pct ? w : m), null)
     if (!worst || worst.pct < settings.warnPct) return null
     const label = a.alias || a.email
     const pct = Math.round(worst.pct)
@@ -68,7 +69,7 @@ export function createMockApi(): SwapperApi {
       label,
       window: worst.label,
       pct,
-      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${settings.threshold}%.`,
+      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${line(worst.key)}%.`,
     }
   }
 
@@ -242,7 +243,8 @@ export function createMockApi(): SwapperApi {
     updateSettings: (patch) =>
       later(() => {
         const next = { ...settings, ...patch }
-        if (next.threshold < 50 || next.threshold > 100) throw new Error('Threshold must be between 50 and 100.')
+        if (next.fiveHourThreshold < 50 || next.fiveHourThreshold > 100) throw new Error('5-hour swap line must be between 50 and 100.')
+        if (next.threshold < 50 || next.threshold > 100) throw new Error('Weekly swap line must be between 50 and 100.')
         if (next.margin < 0 || next.margin > 50) throw new Error('Margin must be between 0 and 50.')
         if (next.cooldownSeconds < 0) throw new Error('Cooldown cannot be negative.')
         if (next.pollIntervalSeconds < 15) throw new Error('Poll interval must be at least 15 seconds.')
