@@ -50,7 +50,13 @@ const LIVE_FRESH_MS = 15 * 60_000
  * beyond one poll interval.
  */
 const MODEL_PER_WEEKLY = 2
+/** A window this close to its swap line is watched at the fast cadence. */
 const NEAR_LINE_PTS = 10
+/**
+ * Two readings of the same weekly reset agree to well within this; two
+ * accounts' weekly resets practically never fall this close together.
+ */
+const FEED_RESET_TOLERANCE_MS = 15 * 60_000
 /** Fallback back-off after a 429 without a Retry-After. */
 const RATE_LIMIT_BACKOFF_MS = 10 * 60_000
 /** How long a failed Codex refresh/usage call holds the next attempt off (a dead refresh token must not be retried every poll). */
@@ -142,6 +148,9 @@ export function validateSettingsPatch(patch: Partial<Settings>, current: Setting
   const next: Settings = { ...current }
   for (const [key, value] of Object.entries(patch)) {
     switch (key as keyof Settings) {
+      case 'fiveHourThreshold':
+        next.fiveHourThreshold = Math.round(assertNumber(key, value, 50, 100))
+        break
       case 'threshold':
         next.threshold = Math.round(assertNumber(key, value, 50, 100))
         break
@@ -217,6 +226,10 @@ export class Daemon {
   private liveAppliedAt = 0
   /** Last endpoint-reported (model, weekly) pair per account, the anchor for the projection. */
   private readonly modelAnchor = new Map<string, { key: string; model: number; weekly: number }>()
+  /** Last endpoint-reported weekly reset per account (ms): what tells one login's status line from another's. */
+  private readonly weeklyResetAt = new Map<string, number>()
+  /** The feed mtime last rejected as another account's, so that is logged once per document. */
+  private rejectedFeedAt = 0
 
   constructor(opts: DaemonOptions) {
     this.store = opts.store
@@ -315,9 +328,10 @@ export class Daemon {
     const settings = this.settings()
     const state = this.store.loadState()
     const usage = this.store.loadUsage()
+    const opts = autoswap.options(settings)
     const accounts = this.store
       .listAccounts()
-      .map((a) => this.toAccount(a, usage[a.id] ?? null, state.activeId, settings.model))
+      .map((a) => this.toAccount(a, usage[a.id] ?? null, state.activeId, opts))
     // Hero first, then the most runway; unknown usage sinks to the bottom.
     accounts.sort((a, b) => {
       if (a.active !== b.active) return a.active ? -1 : 1
@@ -345,8 +359,8 @@ export class Daemon {
     }
   }
 
-  private toAccount(a: StoredAccount, usage: Usage | null, activeId: string | null, model: string): Account {
-    const binding = usage ? autoswap.bindingWindow(usage, model) : null
+  private toAccount(a: StoredAccount, usage: Usage | null, activeId: string | null, opts: autoswap.PolicyOptions): Account {
+    const binding = usage ? autoswap.bindingWindow(usage, opts) : null
     return {
       id: a.id,
       email: a.email,
@@ -360,7 +374,7 @@ export class Daemon {
       addedAt: a.addedAt,
       tokenStatus: a.tokenStatus,
       usage,
-      headroom: usage ? autoswap.headroom(usage, model) : null,
+      headroom: usage ? autoswap.headroom(usage, opts) : null,
       bindingWindow: binding ? binding.key : null,
     }
   }
@@ -442,14 +456,25 @@ export class Daemon {
 
   /**
    * How long to leave an account alone between usage fetches. The active
-   * account is watched every poll; a standby one only every few minutes unless
-   * it is within a few points of the threshold, where a swap decision may hinge
-   * on it. Keeps the usage endpoint's budget intact with many accounts.
+   * account is watched every poll, or every half hour while the status line
+   * feed covers its session and weekly windows, unless a window only the
+   * endpoint reports (the Fable one) is closing in on its swap line: a
+   * projection is not good enough to swap on. A standby account is fetched
+   * every few minutes unless one of its windows is within a few points of its
+   * line, where a swap decision may hinge on it. Keeps the usage endpoint's
+   * budget intact with many accounts.
    */
   private fetchGap(acc: StoredAccount, activeId: string | null, usage: Usage | null, settings: Settings): number {
-    if (acc.id === activeId) return this.liveIsFresh() ? LIVE_FED_FETCH_GAP_MS : MIN_FETCH_GAP_MS
-    const worst = autoswap.bindingWindow(usage, settings.model)
-    if (worst && worst.pct >= settings.threshold - NEAR_LINE_PTS) return MIN_FETCH_GAP_MS
+    const opts = autoswap.options(settings)
+    if (acc.id === activeId) {
+      const feed = this.freshFeed(acc.id)
+      if (!feed) return MIN_FETCH_GAP_MS
+      const liveKeys = new Set(feed.windows.map((w) => w.key))
+      const endpointOnly = autoswap.gatingWindows(usage, settings.model).filter((w) => !liveKeys.has(w.key))
+      return endpointOnly.some((w) => autoswap.pointsToLine(w, opts) <= NEAR_LINE_PTS) ? MIN_FETCH_GAP_MS : LIVE_FED_FETCH_GAP_MS
+    }
+    const closest = autoswap.closestToLine(usage, opts)
+    if (closest && autoswap.pointsToLine(closest, opts) <= NEAR_LINE_PTS) return MIN_FETCH_GAP_MS
     return STANDBY_FETCH_GAP_MS
   }
 
@@ -544,9 +569,11 @@ export class Daemon {
       const weeklyWin = usage.windows.find((w) => w.key === 'seven_day')
       if (modelWin && weeklyWin) this.modelAnchor.set(acc.id, { key: modelKey, model: modelWin.pct, weekly: weeklyWin.pct })
       else this.modelAnchor.delete(acc.id)
+      const weeklyAt = weeklyWin?.resetsAt ? Date.parse(weeklyWin.resetsAt) : NaN
+      if (Number.isFinite(weeklyAt)) this.weeklyResetAt.set(acc.id, weeklyAt)
       // The status line is the fresher source for the active account's 5h/7d windows.
-      const feed = isActive ? live.readLive(dataDir(), this.now()) : null
-      if (feed && this.now().getTime() - feed.at.getTime() < LIVE_FRESH_MS) {
+      const feed = isActive ? this.freshFeed(acc.id) : null
+      if (feed) {
         const liveKeys = new Set(feed.windows.map((w) => w.key))
         usage = { ...usage, windows: [...feed.windows, ...usage.windows.filter((w) => !liveKeys.has(w.key))] }
       }
@@ -619,15 +646,16 @@ export class Daemon {
 
   /**
    * Raise the compact-nudge flag while an automatic swap is close: the active
-   * account's worst gating window is at or past `warnPct` and auto-swap is
-   * armed for real. Clear it otherwise. The id is stable for one episode so
-   * the hook blocks a prompt at most once per approach to the line.
+   * account's gating window nearest its swap line is at or past `warnPct` and
+   * auto-swap is armed for real. Clear it otherwise. The id is stable for one
+   * episode so the hook blocks a prompt at most once per approach to the line.
    */
   private updateNudge(settings: Settings): void {
     const state = this.store.loadState()
     const active = state.activeId ? this.store.getAccount(state.activeId) : null
     const usage = active ? (this.store.loadUsage()[active.id] ?? null) : null
-    const worst = active && settings.autoswapEnabled && !settings.dryRun ? autoswap.bindingWindow(usage, settings.model) : null
+    const opts = autoswap.options(settings)
+    const worst = active && settings.autoswapEnabled && !settings.dryRun ? autoswap.closestToLine(usage, opts) : null
     if (!active || !worst || worst.pct < settings.warnPct) {
       if (nudge.readFlag()) {
         nudge.clearFlag()
@@ -644,7 +672,7 @@ export class Daemon {
       label,
       window: worst.label,
       pct,
-      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${settings.threshold}%.`,
+      message: `${label} is at ${pct}% of ${worst.label} and will be swapped at ${autoswap.swapLineFor(worst.key, opts)}%.`,
     }
     const previous = nudge.readFlag()
     nudge.writeFlag(flag, settings.nudgeMode)
@@ -691,10 +719,10 @@ export class Daemon {
    * from the last endpoint fetch. Returns true when something changed.
    */
   private applyLive(): boolean {
-    const feed = live.readLive(dataDir(), this.now())
-    if (!feed || feed.at.getTime() <= this.liveAppliedAt) return false
     const state = this.store.loadState()
     if (!state.activeId) return false
+    const feed = this.feedFor(state.activeId)
+    if (!feed || feed.at.getTime() <= this.liveAppliedAt) return false
     const acc = this.store.getAccount(state.activeId)
     if (!acc) return false
     const all = this.store.loadUsage()
@@ -721,9 +749,46 @@ export class Daemon {
     return true
   }
 
-  private liveIsFresh(): boolean {
+  /**
+   * Whose numbers a status line document carries. After a swap, a Claude Code
+   * session still finishing a turn on the previous login keeps writing that
+   * login's windows, and they must not land on the new active account: the
+   * policy would read them as "still exhausted" and swap again. The weekly
+   * reset is stable for a week and differs between accounts, so a document
+   * whose weekly reset matches a standby account's and not the active one's is
+   * that account's. Anything unrecognised is taken as the active account's: a
+   * weekly rollover moves the reset forward, and before the first endpoint
+   * fetch nothing is known.
+   */
+  private feedOwner(feed: live.LiveUsage, activeId: string): 'active' | 'other' | 'unknown' {
+    const weekly = feed.windows.find((w) => w.key === 'seven_day')
+    const at = weekly?.resetsAt ? Date.parse(weekly.resetsAt) : NaN
+    if (!Number.isFinite(at)) return 'unknown'
+    const near = (id: string): boolean => {
+      const known = this.weeklyResetAt.get(id)
+      return known !== undefined && Math.abs(known - at) <= FEED_RESET_TOLERANCE_MS
+    }
+    if (near(activeId)) return 'active'
+    for (const id of this.weeklyResetAt.keys()) if (id !== activeId && near(id)) return 'other'
+    return 'unknown'
+  }
+
+  /** The status line feed, unless it belongs to another account; that is logged once per document. */
+  private feedFor(activeId: string): live.LiveUsage | null {
     const feed = live.readLive(dataDir(), this.now())
-    return feed !== null && this.now().getTime() - feed.at.getTime() < LIVE_FRESH_MS
+    if (!feed) return null
+    if (this.feedOwner(feed, activeId) !== 'other') return feed
+    if (feed.at.getTime() !== this.rejectedFeedAt) {
+      this.rejectedFeedAt = feed.at.getTime()
+      this.store.appendEvent('info', 'Ignored status line numbers still coming from the previous login', activeId)
+    }
+    return null
+  }
+
+  /** The active account's feed when it is recent enough to stand in for the endpoint. */
+  private freshFeed(activeId: string): live.LiveUsage | null {
+    const feed = this.feedFor(activeId)
+    return feed && this.now().getTime() - feed.at.getTime() < LIVE_FRESH_MS ? feed : null
   }
 
   installFeed(): AppState {
@@ -833,7 +898,7 @@ export class Daemon {
         acc,
         this.store.loadUsage()[acc.id] ?? null,
         this.store.loadState().activeId,
-        this.settings().model,
+        autoswap.options(this.settings()),
       )
       this.store.appendEvent('login', `logged in as ${acc.email}`, acc.id)
       this.lastAttempt.delete(acc.id)
@@ -895,6 +960,8 @@ export class Daemon {
       throw new Error('cannot remove the active account; switch to another account first')
     }
     this.store.deleteAccount(accountId)
+    this.weeklyResetAt.delete(accountId)
+    this.modelAnchor.delete(accountId)
     try {
       this.store.deleteCredential(accountId)
     } catch {

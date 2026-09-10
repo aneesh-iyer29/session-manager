@@ -138,10 +138,21 @@ function gating(usage: Usage | null, model: string): UsageWindow[] {
   return usage.windows.filter((w) => w.key === 'five_hour' || w.key === 'seven_day' || w.key === key)
 }
 
-export function toAccount(a: MockAccount, activeId: string | null, model: string): Account {
-  const windows = gating(a.usage, model)
-  let binding: UsageWindow | null = null
-  for (const w of windows) if (!binding || w.pct > binding.pct) binding = w
+/**
+ * Mirrors `autoswap.bindingWindow`: the 5-hour session, or a weekly window that
+ * is past the warn line and higher than the session; the highest window when
+ * there is no session.
+ */
+export function toAccount(a: MockAccount, activeId: string | null, settings: Pick<Settings, 'model' | 'threshold' | 'warnPct'>): Account {
+  const windows = gating(a.usage, settings.model)
+  const session = windows.find((w) => w.key === 'five_hour') ?? null
+  let binding: UsageWindow | null = session
+  if (session) {
+    const gate = Math.min(settings.warnPct, settings.threshold)
+    for (const w of windows) if (w.key !== 'five_hour' && w.pct >= gate && w.pct > (binding as UsageWindow).pct) binding = w
+  } else {
+    for (const w of windows) if (!binding || w.pct > binding.pct) binding = w
+  }
   return {
     ...a,
     active: a.id === activeId,
@@ -177,7 +188,7 @@ export function buildState(parts: {
     },
     autoswap: { lastDecision: parts.lastDecision, lastSwitchAt: parts.lastSwitchAt },
     settings,
-    accounts: parts.accounts.map((a) => toAccount(a, parts.activeId, settings.model)),
+    accounts: parts.accounts.map((a) => toAccount(a, parts.activeId, settings)),
     codex: settings.codexEnabled ? parts.codex : { ...parts.codex, usage: null },
     nudge: parts.nudge,
     liveFeed: parts.liveFeed,

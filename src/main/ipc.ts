@@ -13,6 +13,7 @@ import { dataDir } from './paths'
 const SETTING_KEYS: ReadonlySet<string> = new Set([
   'autoswapEnabled',
   'dryRun',
+  'fiveHourThreshold',
   'threshold',
   'margin',
   'cooldownSeconds',
