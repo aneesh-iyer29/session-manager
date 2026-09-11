@@ -1,9 +1,55 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
-  <!-- Session Manager app icon: the brand mark in ink on a full-bleed paper square,
-       the same treatment as a standard touch icon. No clipping, so no corners show. -->
-  <rect width="1024" height="1024" fill="#fbfaf7"/>
-  <g fill="#232323" transform="translate(41 220.5) scale(17.26)">
-    <path d="M10.01,30.8c-1.48,1.36-3.51,2.77-5.47,2.96-1.23.12-2.43-.19-3.36-1C.4,32.07-.05,31.09,0,30.06c.11-1.91,1.77-3.32,3.65-3.14.74.13,1.38.41,1.91.93.85.41,1.77.44,2.65.1s1.71-.87,2.45-1.51c.88-.77,1.66-1.55,2.41-2.46l6.88-8.26,3.5-4.21c1.85-2.23,3.86-4.28,6.11-6.12s4.61-3.27,7.27-4.24c4.62-1.69,10.16-1.68,14.26,1.19,2.07,1.45,3.84,3.98,3.44,6.53-.18,1.19-1,2.17-1.99,2.59-1.19.51-2.48.3-3.44-.44-.74-.58-1-1.33-1.1-2.22-.21-1.85-1.31-3.45-2.9-4.37-3.39-1.94-7.71-.8-10.96,1.06s-5.83,4.26-8.29,6.94c-2.05,2.23-3.94,4.55-5.87,6.89l-5.63,6.86c-1.35,1.65-2.75,3.17-4.34,4.62Z"/>
-    <path d="M35.82,28.84c-.58,1.22-.54,2.24-1.07,2.25-.25,0-.42-.12-.49-.39-.52-2.11-1.57-3.84-3.57-4.8l-1.96-.7c-.2-.07-.33-.19-.34-.37-.02-.21.1-.36.32-.44l1.7-.58c1.44-.61,2.56-1.67,3.22-3.09l.69-1.98c.08-.23.21-.36.43-.35s.35.14.41.37c.51,2.21,1.43,3.84,3.51,4.86l2.01.74c.22.08.35.21.36.41,0,.21-.13.35-.36.42-2.18.64-3.84,1.48-4.87,3.63Z"/>
+  <!-- Session Manager app icon: the code-bracket mark (a cyan "<", a white slash, an
+       amber ">") on a night-blue tile with a faint grid. The tile is the macOS icon
+       shape (824 px on a 1024 canvas, 185 px corners) so it sits level with the
+       system's own icons in the Dock. Each bracket arm is its own parallelogram with
+       its own gradient, so the fold at the vertex reads as a seam of two tones. -->
+  <defs>
+    <clipPath id="tile">
+      <rect x="100" y="100" width="824" height="824" rx="185" ry="185"/>
+    </clipPath>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#ffffff" stroke-opacity="0.045" stroke-width="2"/>
+    </pattern>
+    <linearGradient id="cyanUp" gradientUnits="userSpaceOnUse" x1="393" y1="60" x2="74" y2="380">
+      <stop offset="0" stop-color="#1d8fe9"/>
+      <stop offset="1" stop-color="#00e8d8"/>
+    </linearGradient>
+    <linearGradient id="cyanDown" gradientUnits="userSpaceOnUse" x1="74" y1="380" x2="294" y2="590">
+      <stop offset="0" stop-color="#1d8fe9"/>
+      <stop offset="1" stop-color="#00e8d8"/>
+    </linearGradient>
+    <linearGradient id="amberUp" gradientUnits="userSpaceOnUse" x1="820" y1="210" x2="990" y2="380">
+      <stop offset="0" stop-color="#fbbf2f"/>
+      <stop offset="1" stop-color="#f68a2c"/>
+    </linearGradient>
+    <linearGradient id="amberDown" gradientUnits="userSpaceOnUse" x1="990" y1="380" x2="670" y2="700">
+      <stop offset="0" stop-color="#fbd33a"/>
+      <stop offset="1" stop-color="#f57f29"/>
+    </linearGradient>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <rect x="100" y="100" width="824" height="824" fill="#181d2b"/>
+    <rect x="100" y="100" width="824" height="824" fill="url(#grid)"/>
+  </g>
+
+  <!-- Mark geometry: 45° arms, band 104 wide (147 across a horizontal cut), drawn in a
+       1063 × 640 box (y 60 to 700) and scaled to 648 px wide, centred on the tile. -->
+  <g transform="translate(188 317) scale(0.61) translate(0 -60)" stroke-linejoin="round" stroke-width="18">
+    <!-- cyan "<", upper arm: flat top with a large rounded outer corner -->
+    <path fill="url(#cyanUp)" stroke="url(#cyanUp)"
+          d="M0 380 L320 60 L423 60 A44 44 0 0 1 467 104 L467 104 L147 380 Z"/>
+    <!-- cyan "<", lower arm: cut square by the slash's left edge -->
+    <path fill="url(#cyanDown)" stroke="url(#cyanDown)"
+          d="M0 380 L147 380 L331 554 L257.5 627.5 Z"/>
+    <!-- amber ">", upper arm: cut square by the slash's right edge -->
+    <path fill="url(#amberUp)" stroke="url(#amberUp)"
+          d="M1063 380 L916 380 L784 248 L857.5 174.5 Z"/>
+    <!-- amber ">", lower arm: flat bottom with a large rounded outer corner -->
+    <path fill="url(#amberDown)" stroke="url(#amberDown)"
+          d="M1063 380 L743 700 L640 700 A44 44 0 0 1 596 656 L916 380 Z"/>
+    <!-- the slash, over both brackets -->
+    <path fill="#f6f7fb" stroke="#f6f7fb" d="M185 700 L825 60 L972 60 L332 700 Z"/>
   </g>
 </svg>

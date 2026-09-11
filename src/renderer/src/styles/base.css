@@ -1,4 +1,20 @@
-/* Fonts (bundled, SIL Open Font License), reset, type roles, focus ring. */
+/* Fonts (bundled, SIL Open Font License), reset, type roles, focus ring.
+   Montserrat is the working face; Space Mono stays for the log and the countdowns,
+   where a fixed pitch keeps columns still; Lora is the wordmark. */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('../assets/fonts/Montserrat-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('../assets/fonts/Montserrat-Bold.ttf') format('truetype');
+}
 @font-face {
   font-family: 'Space Mono';
   font-style: normal;
@@ -12,13 +28,6 @@
   font-weight: 700;
   font-display: block;
   src: url('../assets/fonts/i7dMIFZifjKcF5UAWdDRaPpZYFI.ttf') format('truetype');
-}
-@font-face {
-  font-family: 'Space Mono';
-  font-style: italic;
-  font-weight: 400;
-  font-display: block;
-  src: url('../assets/fonts/i7dNIFZifjKcF5UAWdDRYER8QA.ttf') format('truetype');
 }
 @font-face {
   font-family: 'Lora';
@@ -60,6 +69,7 @@ body {
   font-family: var(--font);
   font-size: 13px;
   line-height: 1.5;
+  font-variant-numeric: tabular-nums;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

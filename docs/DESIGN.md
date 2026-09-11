@@ -10,9 +10,11 @@ click. The register is a lab instrument, not a consumer dashboard. Every element
 
 Derived from the house stylesheet (September 2026):
 
-- **Type.** Space Mono for everything that works (body, numbers, labels, controls). Lora, the
-  brand serif, only for the wordmark and one welcoming headline. Both are bundled under the SIL
-  Open Font License in `src/renderer/src/assets/fonts`; nothing is fetched at runtime.
+- **Type.** Montserrat for everything that works (body, numbers, labels, controls), with
+  tabular figures so changing numbers hold their width. Space Mono only where a fixed pitch
+  keeps columns still: the log lines, the countdowns, inline code. Lora, the brand serif, only
+  for the wordmark and one welcoming headline. All three are bundled under the SIL Open Font
+  License in `src/renderer/src/assets/fonts`; nothing is fetched at runtime.
 - **Colour.** Paper `#fbfaf7`, ink `#232323`, muted `#514e47`, nav-off `#6c695f`, line `#e1ded6`,
   box rule `#c7c4bb`, separator `#b8b5ab`, quote rule `#a6a399`. Status: ok `#3d6b51`, error
   `#96453c`, gold `#84754e`. The accent *is* the ink: primary actions are ink-filled.
@@ -53,7 +55,7 @@ See `src/renderer/src/styles/tokens.css`. Roles, light values:
 | `--gold` | `#84754e` | hero rule, armed state, swap events, warn bucket |
 | `--ok` / `--danger` | `#3d6b51` / `#96453c` | headroom ≥ 30 / ≤ 10 or at threshold |
 
-Type scale (Space Mono unless noted; tracking is size-specific):
+Type scale (Montserrat unless noted; tracking is size-specific):
 
 | Role | Size / weight / tracking |
 | --- | --- |
@@ -64,7 +66,7 @@ Type scale (Space Mono unless noted; tracking is size-specific):
 | Name | 14–16px / 700 / -0.01em |
 | Body | 13px / 400 / 0, leading 1.5 |
 | Label / eyebrow / button | 10–11px / 700 / +0.10–0.14em, uppercase |
-| Log line | 11px / 400 |
+| Log line | Space Mono 11px / 400 |
 
 Spacing: 4-pt grid. Card padding 16 (hero 18, with 24 on the ruled side), gaps 12, section gaps
 24, window padding 20. Radius 3 everywhere. No shadows.
