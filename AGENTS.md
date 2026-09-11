@@ -6,8 +6,8 @@ content with a module table; this file stands alone for the essentials.
 ## What this is
 
 Session Manager: a macOS Electron (main: Node) + React (renderer) + TypeScript app. It
-tracks usage for many Claude Code accounts, swaps the active login before the Fable weekly
-(or 5-hour / weekly) limit hits, and shows one Codex account's quota read-only. Single
+tracks usage for many Claude Code accounts, swaps the active login before the 5-hour session
+(or a weekly / Fable weekly window) throttles it, and shows one Codex account's quota read-only. Single
 user, local only, no telemetry.
 
 ## Source of truth
@@ -45,7 +45,7 @@ CI runs typecheck, lint, test, and build on Ubuntu; packaging and the smoke laun
 5. Renderer uses React and `motion/react` only. Springs only; respect reduced motion.
 6. TypeScript strict, ESM, no new runtime dependencies. Main/preload use Node built-ins
    and Electron only.
-7. Keep scope: many Claude accounts, one Codex account, Fable-gated swapping. No i18n,
+7. Keep scope: many Claude accounts, one Codex account, window-gated swapping. No i18n,
    no extra themes, no plugins.
 8. Never commit to `main`. Every change goes up on a branch as a pull request whose
    description says what changed and why; merge once CI is green.

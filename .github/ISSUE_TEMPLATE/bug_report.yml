@@ -11,8 +11,8 @@ body:
     id: version
     attributes:
       label: App version
-      description: Shown on the menu bar Quit item
-      placeholder: 0.1.0
+      description: Finder → Get Info on Session Manager.app, or the version in the DMG's name
+      placeholder: 0.6.0
     validations:
       required: true
   - type: input
