@@ -4,9 +4,9 @@ name: Release
 # release. Packaging needs macOS (hdiutil for the DMG); CI stays on Ubuntu for everything
 # else. The release notes are the version's section of CHANGELOG.md.
 #
-# Run it by hand (Actions → Release → Run workflow) when the tag cannot be pushed from where
-# the merge happened: it then creates the tag itself on the given commit (default: the head
-# of the branch it was run from).
+# Run it by hand (Actions → Release → Run workflow) to rebuild or republish an existing
+# tag. The tag itself has to be pushed by a person: the workflow token is refused any ref
+# whose commit adds or changes a workflow file, so it cannot create release tags reliably.
 on:
   push:
     tags: ['v*']
@@ -16,7 +16,7 @@ on:
         description: 'Version to release, without the v (must match a CHANGELOG.md section)'
         required: true
       commit:
-        description: 'Commit to tag and build; empty means the head of this ref'
+        description: 'Commit to build; empty means the head of this ref. The tag v<version> must already exist on it.'
         required: false
         default: ''
 
@@ -55,18 +55,14 @@ jobs:
           ' CHANGELOG.md > notes.md
           if [ ! -s notes.md ]; then echo "No CHANGELOG section for $version" >&2; exit 1; fi
           printf '\nFull notes in [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md). Unsigned build: right-click, then Open the first time.\n' "$GITHUB_REPOSITORY" "$TAG" >> notes.md
-      # A manual run has no tag yet. Push it from here (a push made with GITHUB_TOKEN does
-      # not start another run), so the release below attaches to an existing tag.
-      - name: Tag the target commit
+      # The release step would otherwise try to create the tag, which the workflow token
+      # is refused when the commit touches a workflow file. Fail early with a plain message.
+      - name: Check the tag exists
         if: github.event_name == 'workflow_dispatch'
         run: |
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
-            echo "$TAG already exists"
-          else
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git tag -a "$TAG" "$TARGET" -m "Session Manager $TAG"
-            git push origin "refs/tags/$TAG"
+          if ! git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "Tag $TAG does not exist. Push it first: git tag -a $TAG $TARGET -m 'Session Manager $TAG' && git push origin $TAG" >&2
+            exit 1
           fi
       - uses: softprops/action-gh-release@v2
         with:
