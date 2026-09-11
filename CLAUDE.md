@@ -1,7 +1,7 @@
 # Session Manager — notes for Claude Code
 
 macOS Electron + React + TypeScript app. Watches usage for many Claude Code accounts,
-auto-swaps the active login before the Fable weekly / 5-hour / weekly window bites, shows
+auto-swaps the active login before the 5-hour session or a weekly / Fable weekly window bites, shows
 one Codex account's quota read-only. One user, no server, no telemetry.
 
 ## Layout

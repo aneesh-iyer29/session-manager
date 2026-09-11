@@ -12,6 +12,13 @@
     "type": "git",
     "url": "git+https://github.com/aneesh-iyer29/session-manager.git"
   },
+  "homepage": "https://github.com/aneesh-iyer29/session-manager#readme",
+  "bugs": {
+    "url": "https://github.com/aneesh-iyer29/session-manager/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "electron-vite dev",
     "dev:web": "vite --config vite.web.config.ts",

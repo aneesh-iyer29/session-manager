@@ -1,0 +1,28 @@
+name: Feature request
+description: Something Session Manager should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The scope is deliberately narrow: many Claude accounts, one Codex account, swapping before a
+        window throttles you. Multiple Codex accounts, other providers, plugins, and i18n are out of
+        scope (see CONTRIBUTING.md). Everything else is worth a conversation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What is awkward today
+      description: The situation you hit and what you had to do about it.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like instead
+      description: The behaviour or control you have in mind. A sketch of where it lives in the UI helps.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
