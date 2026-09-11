@@ -1,7 +1,7 @@
 # Contributing
 
 Thanks for helping. Session Manager is deliberately small; the best contributions keep it
-that way.
+that way. Taking part means following the [code of conduct](CODE_OF_CONDUCT.md).
 
 ## Setup
 
@@ -38,8 +38,8 @@ CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the s
   will be rejected.
 - **No secrets anywhere visible.** Not in logs, thrown errors, events, or test fixtures
   that resemble real tokens.
-- **UI follows `docs/DESIGN.md`.** Springs only, system font, semantic colours, tabular
-  numbers. Check both light and dark and the 860×600 minimum size.
+- **UI follows `docs/DESIGN.md`.** Springs only, the bundled typefaces, semantic colours,
+  tabular numbers. Check both light and dark and the 860×600 minimum size.
 - **Scope.** Many Claude accounts, one Codex account, one gating model window. Features
   outside that (multiple Codex accounts, other providers, plugins, i18n) belong in a fork.
 
@@ -64,4 +64,5 @@ TypeScript strict, ESM, Prettier-ish formatting (2 spaces, no semicolons, single
 ## Reporting bugs
 
 Use the bug report template. Include the Activity log lines (they never contain secrets)
-and your macOS and app versions.
+and your macOS and app versions. Feature ideas go in the feature request template; check
+the scope note above first. Security problems go by email, see [SECURITY.md](SECURITY.md).

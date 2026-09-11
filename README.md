@@ -1,5 +1,9 @@
 # Session Manager
 
+[![CI](https://github.com/aneesh-iyer29/session-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/aneesh-iyer29/session-manager/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/aneesh-iyer29/session-manager)](https://github.com/aneesh-iyer29/session-manager/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 A macOS menu bar app for people who run several Claude Code accounts. It watches the
 usage limits of every account, shows how much runway each one has left, and swaps the
 active login before the 5-hour session (or the weekly / Fable weekly window) throttles you.
@@ -14,14 +18,18 @@ One Codex account's quota is shown alongside, read-only.
   dry-run mode keep it from flapping.
 - **One Codex account, read-only.** If the Codex CLI is logged in with ChatGPT, its 5-hour
   and weekly windows appear in the sidebar.
-- **Menu bar first.** The tray title reads `work 63%` (alias and binding-window percent);
-  the menu switches accounts, toggles auto-swap, and quits. The window is optional.
+- **Menu bar first.** The tray item is a glance menu: a usage bar per window for every
+  account, plus Open and Quit. Switching and settings live in the window, so the menu can
+  never change anything by accident.
 
 Nothing leaves your machine except the calls to Anthropic's and OpenAI's own APIs.
 
+![The dashboard: the active account's gauge, standby accounts, and the Codex and auto-swap panels](docs/screenshot.png)
+
 ## Install
 
-**Download.** Grab `Session Manager-<version>-arm64.dmg` (or `x64`) from
+**Download.** Grab `Session.Manager-<version>-arm64.dmg` (Apple silicon) or
+`Session.Manager-<version>.dmg` (Intel) from
 [Releases](https://github.com/aneesh-iyer29/session-manager/releases), open it, and drag the
 app to Applications. Builds are unsigned, so the first launch needs either right-click →
 Open, or:
@@ -154,6 +162,13 @@ npm run dist:dir   # unsigned dist/mac-arm64/Session Manager.app; npm run dist a
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md), [docs/DESIGN.md](docs/DESIGN.md),
 [docs/USAGE.md](docs/USAGE.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
 
+## Contributing and security
+
+Bug reports and pull requests are welcome; [CONTRIBUTING.md](CONTRIBUTING.md) has the setup,
+the ground rules, and the release steps, and everyone taking part is covered by the
+[code of conduct](CODE_OF_CONDUCT.md). Security problems go by email, not the issue
+tracker; see [SECURITY.md](SECURITY.md).
+
 ## Credits
 
 The switching mechanics (Keychain swap under Claude Code's lock files, `oauthAccount`
@@ -162,6 +177,10 @@ and the quota views and Codex usage handling borrow ideas from
 [mathdevie/devie-ai-quota-tracker](https://github.com/mathdevie/devie-ai-quota-tracker).
 Both are MIT licensed. Thank you.
 
+The bundled typefaces (Montserrat, Space Mono, Lora) are under the SIL Open Font License;
+their notices are in [src/renderer/src/assets/fonts/README.md](src/renderer/src/assets/fonts/README.md).
+
 ## License
 
-MIT © 2026 Aneesh Iyer. See [LICENSE](LICENSE).
+MIT © 2026 Aneesh Iyer. See [LICENSE](LICENSE). Session Manager is an independent project
+and is not affiliated with Anthropic or OpenAI.

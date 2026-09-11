@@ -33,8 +33,9 @@ src/shared/     types.ts (data model), ipc.ts (channels + SwapperApi)   ← the 
 src/main/       Electron main process (Node): everything that touches disk, Keychain, network
 src/preload/    contextBridge exposing SwapperApi as window.swapper
 src/renderer/   React UI; src/renderer/src/mock/ is a full in-memory backend for browser dev
-build/          electron-builder resources (icon.icns, entitlements)
-docs/           this file, USAGE.md
+build/          electron-builder resources (icon.svg → icon.icns/png, tray.svg → template PNGs, entitlements)
+docs/           this file, DESIGN.md, USAGE.md
+.github/        CI (typecheck, lint, test, build on Ubuntu) and the tag-driven release workflow
 ```
 
 ## Runtime layout
@@ -275,10 +276,14 @@ prompt with a message or hand Claude context. So:
 ## Packaging
 
 `npm run build` → `out/main/index.js`, `out/preload/index.mjs` (Electron needs the `.mjs`
-extension for an ESM preload), `out/renderer/`. `npm run dist:dir` → `dist/mac-arm64/Claude
-Swapper.app`; `npm run dist` → `dist/Session Manager-<version>-arm64.dmg` (and x64, and zips).
+extension for an ESM preload), `out/renderer/`. `npm run dist:dir` → `dist/mac-arm64/Session
+Manager.app`; `npm run dist` → `dist/Session Manager-<version>-arm64.dmg` (and x64, and zips).
 Builds are unsigned (`identity: null`); first launch needs right-click → Open, or
 `xattr -dr com.apple.quarantine "/Applications/Session Manager.app"`.
+
+Releases are cut by pushing a `v<version>` tag: `.github/workflows/release.yml` runs the
+checks, packages on a macOS runner, and publishes the GitHub release with the DMGs and the
+matching `CHANGELOG.md` section as notes. The steps are in `CONTRIBUTING.md`.
 
 ## Conventions
 
