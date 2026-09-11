@@ -55,9 +55,11 @@ TypeScript strict, ESM, Prettier-ish formatting (2 spaces, no semicolons, single
    `## [x.y.z]` section in `CHANGELOG.md`. Open the PR and merge it once CI is green.
 2. Tag the merge commit `vx.y.z` and push the tag. The release workflow
    (`.github/workflows/release.yml`) builds the unsigned arm64 and x64 DMGs on a macOS runner
-   and publishes the GitHub release with that CHANGELOG section as its notes. If the tag
-   cannot be pushed from where the merge happened, run the workflow by hand from the Actions
-   tab with the version (and optionally the commit); it creates the tag itself.
+   and publishes the GitHub release with that CHANGELOG section as its notes. The tag has to
+   be pushed by a person: the workflow token cannot create it (GitHub refuses an Actions token
+   any ref whose commit adds or changes a workflow file). Running the workflow by hand from
+   the Actions tab, with the version and optionally the commit, rebuilds and republishes an
+   existing tag.
 
 ## Reporting bugs
 
