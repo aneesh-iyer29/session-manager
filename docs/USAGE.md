@@ -1,5 +1,14 @@
 # Using Session Manager
 
+The user guide: every panel, setting, and file, from the user's side. For install steps see
+the [README](../README.md); for how it works underneath see [ARCHITECTURE.md](ARCHITECTURE.md).
+
+**Contents:** [Adding accounts](#adding-accounts) · [Reading a card](#reading-a-card) ·
+[Switching manually](#switching-manually) · [Auto-swap](#auto-swap) ·
+[Live usage from Claude Code](#live-usage-from-claude-code) · [Compact nudge](#compact-nudge) ·
+[Codex panel](#codex-panel) · [Menu bar](#menu-bar) · [Settings reference](#settings-reference) ·
+[Files](#files)
+
 ## Adding accounts
 
 **Capture current login.** If Claude Code is signed in, this copies its credential from
