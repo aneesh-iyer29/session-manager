@@ -261,7 +261,7 @@ prompt with a message or hand Claude context. So:
   `trafficLightPosition: {x: 18, y: 18}`, `vibrancy: 'under-window'`, `visualEffectState:
   'active'`. Closing hides the window; the app keeps running in the tray. Quit from the tray
   menu or ⌘Q.
-* Tray: the Arcophos mark as a template image (`build/trayTemplate*.png`, regenerated with
+* Tray: the code-bracket mark as a template image (`build/trayTemplate*.png`, regenerated with
   `npx electron scripts/render-tray.mjs` from `build/tray.svg`), no title. Click pops a glance
   menu whose rows are images: `trayText.ts` builds the row model and its HTML,
   `trayRender.ts` paints all rows in one offscreen transparent window at 2× and crops them into
