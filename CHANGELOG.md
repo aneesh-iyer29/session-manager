@@ -3,6 +3,22 @@
 All notable changes to Session Manager are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow SemVer.
 
+## [0.6.0] - 2026-09-11
+
+### Changed
+
+- New app icon: the code-bracket mark, a cyan `<`, a white slash and an amber `>` on a
+  night-blue tile in the macOS icon shape. The menu bar glyph is the same mark as a template
+  image.
+- Montserrat is the working typeface for body, numbers, labels and controls, with tabular
+  figures so the gauges keep their width as numbers change. Space Mono stays for the log
+  lines, countdowns and inline code; Lora still sets the wordmark.
+
+### Added
+
+- A release workflow: pushing a `v*` tag builds the unsigned DMGs on a macOS runner and
+  publishes the GitHub release with the matching CHANGELOG section as its notes.
+
 ## [0.5.0] - 2026-09-10
 
 ### Added

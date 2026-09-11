@@ -48,6 +48,15 @@ CI runs typecheck, lint, test, and build on `ubuntu-latest`; packaging and the s
 TypeScript strict, ESM, Prettier-ish formatting (2 spaces, no semicolons, single quotes,
 120 columns). Small functions. Comments explain *why*, not *what*.
 
+## Releasing
+
+1. On a branch, bump `version` in `package.json` (and the lockfile via
+   `npm version <x.y.z> --no-git-tag-version`) and turn the *Unreleased* work into a dated
+   `## [x.y.z]` section in `CHANGELOG.md`. Open the PR and merge it once CI is green.
+2. Tag the merge commit `vx.y.z` and push the tag. The release workflow
+   (`.github/workflows/release.yml`) builds the unsigned arm64 and x64 DMGs on a macOS runner
+   and publishes the GitHub release with that CHANGELOG section as its notes.
+
 ## Reporting bugs
 
 Use the bug report template. Include the Activity log lines (they never contain secrets)

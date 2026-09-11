@@ -1,5 +1,5 @@
 /**
- * Menu bar item: the Arcophos mark alone, no title. Clicking it opens a glance
+ * Menu bar item: the code-bracket mark alone, no title. Clicking it opens a glance
  * menu — a usage bar per window for every account and Codex, one status line —
  * and two actions: open the app, quit. Everything else (switching, toggles)
  * lives in the window on purpose, so the menu can never change state by accident.

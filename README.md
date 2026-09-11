@@ -106,7 +106,7 @@ details in [docs/USAGE.md](docs/USAGE.md#compact-nudge).
 
 ## Menu bar and launch at login
 
-The tray item is the Arcophos mark. Click it for a glance menu with usage bars for every
+The tray item is the code-bracket mark. Click it for a glance menu with usage bars for every
 account and Codex, plus Open Session Manager and Quit; all management stays in the window. Closing the window hides it; quit from the menu or with ⌘Q. *Show in
 Dock* off makes it a pure menu-bar app.
 
