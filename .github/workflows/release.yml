@@ -55,6 +55,19 @@ jobs:
           ' CHANGELOG.md > notes.md
           if [ ! -s notes.md ]; then echo "No CHANGELOG section for $version" >&2; exit 1; fi
           printf '\nFull notes in [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md). Unsigned build: right-click, then Open the first time.\n' "$GITHUB_REPOSITORY" "$TAG" >> notes.md
+      # A manual run has no tag yet. Push it from here (a push made with GITHUB_TOKEN does
+      # not start another run), so the release below attaches to an existing tag.
+      - name: Tag the target commit
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null; then
+            echo "$TAG already exists"
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git tag -a "$TAG" "$TARGET" -m "Session Manager $TAG"
+            git push origin "refs/tags/$TAG"
+          fi
       - uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.TAG }}
