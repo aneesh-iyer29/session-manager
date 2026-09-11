@@ -1,9 +1,17 @@
 # Architecture
 
 Session Manager is a macOS Electron app. It watches the usage limits of several Claude Code
-accounts, swaps the active account before the Fable weekly (or 5-hour / weekly) limit bites,
-and shows the one Codex account's quota read-only. It is deliberately narrow: **many Claude
-accounts, one Codex account, one model family (Fable) that gates swapping.**
+accounts, swaps the active account before its 5-hour session (or a weekly / Fable weekly
+window) throttles it, and shows the one Codex account's quota read-only. It is deliberately
+narrow: **many Claude accounts, one Codex account, three windows that gate swapping.**
+
+**Contents:** [Source layout](#source-layout) · [Runtime layout](#runtime-layout) ·
+[Credential shapes](#credential-shapes) · [Endpoints used](#endpoints-used) ·
+[Normalized usage model](#normalized-usage-model) · [Swap policy](#swap-policy-srcmainautoswapts) ·
+[Switch mechanics](#switch-mechanics-srcmainswitcherts) · [Daemon](#daemon-srcmaindaemonts) ·
+[Live status line feed](#live-status-line-feed-srcmainliveusagets) ·
+[Compact nudge](#compact-nudge-srcmainnudgets) · [Window and tray](#window-and-tray) ·
+[Packaging](#packaging) · [Conventions](#conventions)
 
 ```
 ┌─────────────────────────── renderer (React) ───────────────────────────┐

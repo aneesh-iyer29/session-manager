@@ -6,6 +6,9 @@ restraint. Its single job: tell one researcher, at a glance, **which Claude acco
 much Fable runway each account has, and whether the auto-swap is armed**, and let them act in one
 click. The register is a lab instrument, not a consumer dashboard. Every element earns its place.
 
+**Contents:** [Brand source](#brand-source) · [Direction](#direction) · [Tokens](#tokens) ·
+[Layout](#layout) · [Motion](#motion) · [Copy](#copy) · [Quality floor](#quality-floor)
+
 ## Brand source
 
 Derived from the live stylesheet of arcophos.com (September 2026):
