@@ -2,10 +2,27 @@ name: Release
 
 # Pushing a version tag builds the unsigned macOS DMGs and publishes them as a GitHub
 # release. Packaging needs macOS (hdiutil for the DMG); CI stays on Ubuntu for everything
-# else. The release notes are the tag's section of CHANGELOG.md.
+# else. The release notes are the version's section of CHANGELOG.md.
+#
+# Run it by hand (Actions → Release → Run workflow) when the tag cannot be pushed from where
+# the merge happened: it then creates the tag itself on the given commit (default: the head
+# of the branch it was run from).
 on:
   push:
     tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, without the v (must match a CHANGELOG.md section)'
+        required: true
+      commit:
+        description: 'Commit to tag and build; empty means the head of this ref'
+        required: false
+        default: ''
+
+env:
+  TAG: ${{ github.event_name == 'push' && github.ref_name || format('v{0}', inputs.version) }}
+  TARGET: ${{ github.event_name == 'push' && github.sha || (inputs.commit || github.sha) }}
 
 permissions:
   contents: write
@@ -16,6 +33,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -28,17 +47,19 @@ jobs:
       - run: npx electron-builder --mac --publish never
       - name: Release notes from CHANGELOG.md
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${TAG#v}"
           awk -v v="$version" '
             $0 ~ "^## \\[" v "\\]" { on = 1; next }
             on && /^## \[/ { exit }
             on { print }
           ' CHANGELOG.md > notes.md
           if [ ! -s notes.md ]; then echo "No CHANGELOG section for $version" >&2; exit 1; fi
-          printf '\nFull notes in [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md). Unsigned build: right-click, then Open the first time.\n' "$GITHUB_REPOSITORY" "$GITHUB_REF_NAME" >> notes.md
+          printf '\nFull notes in [CHANGELOG.md](https://github.com/%s/blob/%s/CHANGELOG.md). Unsigned build: right-click, then Open the first time.\n' "$GITHUB_REPOSITORY" "$TAG" >> notes.md
       - uses: softprops/action-gh-release@v2
         with:
-          name: Session Manager ${{ github.ref_name }}
+          tag_name: ${{ env.TAG }}
+          target_commitish: ${{ env.TARGET }}
+          name: Session Manager ${{ env.TAG }}
           body_path: notes.md
           files: dist/*.dmg
           fail_on_unmatched_files: true
