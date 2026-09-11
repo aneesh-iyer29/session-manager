@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/aneesh-iyer29/session-manager/actions/workflows/ci.yml/badge.svg)](https://github.com/aneesh-iyer29/session-manager/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/aneesh-iyer29/session-manager)](https://github.com/aneesh-iyer29/session-manager/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/aneesh-iyer29/session-manager/total?label=downloads)](https://github.com/aneesh-iyer29/session-manager/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A macOS menu bar app for people who run several Claude Code accounts. It watches the
